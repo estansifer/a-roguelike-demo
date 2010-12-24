@@ -1,0 +1,130 @@
+	Tue Dec 14 19:12 2010 Time and Allocation Profiling Report  (Final)
+
+	   LevelNavi +RTS -p -RTS
+
+	total time  =       33.70 secs   (1685 ticks @ 20 ms)
+	total alloc = 6,194,744,320 bytes  (excludes profiling overheads)
+
+COST CENTRE                    MODULE               %time %alloc
+
+add_dir                        BasicDefs             38.2   52.8
+compute_los                    TerrainComputation    26.1    7.5
+arrayize                       Util                  17.5   22.2
+display_line_of_sight          Main                   5.7   12.4
+is_floor                       BasicDefs              3.9    0.0
+los_path                       TerrainComputation     3.1    3.9
+get_los_path                   TerrainComputation     3.0    0.0
+
+
+                                                                                               individual    inherited
+COST CENTRE              MODULE                                               no.    entries  %time %alloc   %time %alloc
+
+MAIN                     MAIN                                                   1           0   0.0    0.0   100.0  100.0
+ main                    Main                                                 272           1   0.0    0.0    95.7   94.3
+  create_game            GameState                                            278           6   0.0    0.0     0.9    1.0
+   compute_valid_dirs    TerrainComputation                                   355           1   0.0    0.0     0.1    0.0
+    compute_valid_dirs_at BasicDefs                                            357        2766   0.0    0.0     0.1    0.0
+     add_dir             BasicDefs                                            360        1528   0.1    0.0     0.1    0.0
+     is_floor            BasicDefs                                            358        2213   0.0    0.0     0.0    0.0
+    arrayize             Util                                                 356           1   0.0    0.0     0.0    0.0
+   compute_los           TerrainComputation                                   331       33307   0.0    0.0     0.2    0.3
+    is_floor             BasicDefs                                            342      269291   0.0    0.0     0.0    0.0
+    add_dir              BasicDefs                                            339      269291   0.2    0.3     0.2    0.3
+    get_los_path         TerrainComputation                                   333       11102   0.0    0.0     0.0    0.0
+    arrayize             Util                                                 332           1   0.0    0.0     0.0    0.0
+   random_empty_location TerrainComputation                                   325           1   0.0    0.0     0.0    0.0
+    _r'                  TerrainComputation                                   326           1   0.0    0.0     0.0    0.0
+     random_location     TerrainComputation                                   327           5   0.0    0.0     0.0    0.0
+      grid_height        BasicDefs                                            330           1   0.0    0.0     0.0    0.0
+      grid_width         BasicDefs                                            329           1   0.0    0.0     0.0    0.0
+      random_int         Util                                                 328           2   0.0    0.0     0.0    0.0
+   more_seeds            Util                                                 287           1   0.0    0.0     0.0    0.0
+   create_terrain        TerrainGen                                           280          12   0.0    0.0     0.7    0.7
+    place_pillars        TerrainGen                                           319       43026   0.0    0.0     0.4    0.4
+     set                 TerrainGen                                           324          35   0.0    0.0     0.0    0.0
+     opening             TerrainGen                                           321      127440   0.2    0.2     0.2    0.2
+      is_floor           BasicDefs                                            323         688   0.0    0.0     0.0    0.0
+     random_weighted_bool Util                                                 320       10620   0.2    0.2     0.2    0.2
+      pillar_density     TerrainGen                                           322       10620   0.0    0.0     0.0    0.0
+    place_holes          TerrainGen                                           314       11169   0.0    0.0     0.2    0.2
+     set                 TerrainGen                                           318         157   0.0    0.0     0.0    0.0
+     wbranch             TerrainGen                                           316       10620   0.0    0.0     0.2    0.2
+      random_weighted_bool Util                                                 317       10620   0.2    0.2     0.2    0.2
+     hole_density        TerrainGen                                           315       10620   0.0    0.0     0.0    0.0
+    place_room           TerrainGen                                           283        5777   0.0    0.0     0.1    0.1
+     place_y_doors       TerrainGen                                           305         679   0.0    0.0     0.0    0.0
+      wbranch            TerrainGen                                           310         175   0.0    0.0     0.0    0.0
+       random_weighted_bool Util                                                 311         175   0.0    0.0     0.0    0.0
+      bonus_door_prob    TerrainGen                                           309         175   0.0    0.0     0.0    0.0
+      paint_y            TerrainGen                                           308         175   0.0    0.0     0.0    0.0
+      choose_door_placement TerrainGen                                           306         525   0.0    0.0     0.0    0.0
+       random_int        Util                                                 307         350   0.0    0.0     0.0    0.0
+     paint_y             TerrainGen                                           304         154   0.0    0.0     0.0    0.0
+     place_x_doors       TerrainGen                                           295         615   0.0    0.0     0.0    0.0
+      wbranch            TerrainGen                                           300         159   0.0    0.0     0.0    0.0
+       random_weighted_bool Util                                                 301         159   0.0    0.0     0.0    0.0
+      bonus_door_prob    TerrainGen                                           299         159   0.0    0.0     0.0    0.0
+      paint_x            TerrainGen                                           298         159   0.0    0.0     0.0    0.0
+      choose_door_placement TerrainGen                                           296         477   0.0    0.0     0.0    0.0
+       random_int        Util                                                 297         318   0.0    0.0     0.0    0.0
+     paint_x             TerrainGen                                           294         138   0.0    0.0     0.0    0.0
+     choose_div_point    TerrainGen                                           289        4758   0.0    0.0     0.0    0.0
+      branch             TerrainGen                                           302          34   0.0    0.0     0.0    0.0
+       random_bool       Util                                                 303          34   0.0    0.0     0.0    0.0
+      random_int         Util                                                 293         258   0.0    0.0     0.0    0.0
+      wbranch            TerrainGen                                           291         860   0.0    0.0     0.0    0.0
+       random_weighted_bool Util                                                 292         860   0.0    0.0     0.0    0.0
+      hallway_chance     TerrainGen                                           290         447   0.0    0.0     0.0    0.0
+     m_maybe             TerrainGen                                           288         551   0.0    0.0     0.0    0.0
+     wbranch             TerrainGen                                           285         551   0.0    0.0     0.1    0.0
+      random_weighted_bool Util                                                 286         551   0.1    0.0     0.1    0.0
+     cut_larger_dimension TerrainGen                                           284         238   0.0    0.0     0.0    0.0
+    paint_y              TerrainGen                                           282           2   0.0    0.0     0.0    0.0
+    paint_x              TerrainGen                                           281           2   0.0    0.0     0.0    0.0
+   _starting_depth       GameState                                            279           0   0.0    0.0     0.0    0.0
+  main_loop              Main                                                 276        1306   0.0    0.0    94.8   93.3
+   move_player           Main                                                 351        1473   0.0    0.0    87.6   80.8
+    move_player_to       GameState                                            362        1304   0.0    0.0    87.5   80.8
+     compute_los         TerrainComputation                                   363    21716164  26.1    7.5    87.5   80.8
+      is_floor           BasicDefs                                            367    54233826   3.9    0.0     3.9    0.0
+      add_dir            BasicDefs                                            366    54233826  37.9   52.5    37.9   52.5
+      get_los_path       TerrainComputation                                   365     7238504   3.0    0.0     3.0    0.0
+      arrayize           Util                                                 364         652  16.6   20.8    16.6   20.8
+    add_dir              BasicDefs                                            361         652   0.0    0.0     0.0    0.0
+    can_move_in_direction GameState                                            354        1062   0.1    0.0     0.1    0.0
+    char_to_dir          Main                                                 353        1062   0.0    0.0     0.0    0.0
+    get_char             CursesWrapper                                        352        1063   0.0    0.0     0.0    0.0
+   refresh               CursesWrapper                                        350         653   0.7    0.0     0.7    0.0
+   display_player        Main                                                 347         653   0.0    0.0     0.1    0.0
+    print_char           CursesWrapper                                        348         653   0.1    0.0     0.1    0.0
+     cast_char           CursesWrapper                                        349         653   0.0    0.0     0.0    0.0
+   display_line_of_sight Main                                                 277        2612   5.7   12.4     6.4   12.5
+    print_char           CursesWrapper                                        345      137686   0.7    0.0     0.7    0.0
+     cast_char           CursesWrapper                                        346      137686   0.0    0.0     0.0    0.0
+    texture              Main                                                 344      137686   0.0    0.0     0.0    0.0
+  get_screen_size        CursesWrapper                                        275           1   0.0    0.0     0.0    0.0
+  wrap_main              CursesWrapper                                        273           1   0.0    0.0     0.0    0.0
+ CAF                     GHC.Real                                             241           1   0.0    0.0     0.0    0.0
+ CAF                     GHC.Float                                            237          10   0.0    0.0     0.0    0.0
+ CAF                     GHC.Int                                              232           1   0.0    0.0     0.0    0.0
+ CAF                     GHC.Handle                                           218           3   0.0    0.0     0.0    0.0
+ CAF                     GHC.Conc                                             217           1   0.0    0.0     0.0    0.0
+ CAF                     System.Random                                        193           3   0.0    0.0     0.0    0.0
+ CAF                     TerrainGen                                           170           6   0.0    0.0     0.0    0.0
+  place_room             TerrainGen                                           312           0   0.0    0.0     0.0    0.0
+   cut_larger_dimension  TerrainGen                                           313           1   0.0    0.0     0.0    0.0
+ CAF                     BasicDefs                                            169           2   0.0    0.0     0.0    0.0
+  diag_deltas            BasicDefs                                            368           1   0.0    0.0     0.0    0.0
+  hor_deltas             BasicDefs                                            359           1   0.0    0.0     0.0    0.0
+ CAF                     TerrainComputation                                   164           2   0.0    0.0     4.3    5.7
+  los_path_array         TerrainComputation                                   334           1   0.0    0.0     4.3    5.7
+   max_width             TerrainComputation                                   337           1   0.0    0.0     0.0    0.0
+   max_height            TerrainComputation                                   336           1   0.0    0.0     0.0    0.0
+   arrayize              Util                                                 335           1   0.9    1.4     4.3    5.7
+    los_path             TerrainComputation                                   338     3179763   3.1    3.9     3.4    4.3
+     swap_x_y            BasicDefs                                            343      211346   0.0    0.0     0.0    0.0
+     flip_y_dir          BasicDefs                                            341      440438   0.1    0.2     0.1    0.2
+     flip_x_dir          BasicDefs                                            340      387462   0.1    0.2     0.1    0.2
+ CAF                     CursesWrapper                                        159           1   0.0    0.0     0.0    0.0
+  wrap_main              CursesWrapper                                        274           0   0.0    0.0     0.0    0.0
+ CAF                     UI.HSCurses.Curses                                   158           2   0.0    0.0     0.0    0.0
