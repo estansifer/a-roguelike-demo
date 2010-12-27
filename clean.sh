@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm *.o *.hi src/*.o src/*.hi src/*/*.o src/*/*.hi
+rm src/*.o src/*.hi src/*/*.o src/*/*.hi
