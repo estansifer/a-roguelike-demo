@@ -1,5 +1,5 @@
 
-> module Player (
+> module State.Player (
 >       Player(..),
 >       new_player,
 >       step_time,

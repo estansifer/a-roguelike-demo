@@ -12,7 +12,7 @@
 >
 > import Util.CursesWrapper
 > import BasicDefs
-> import GameState
+> import State.GameState
 
 > type Canvas s = SA.STArray s Pos Char
 > type S s = ST s ()
@@ -26,21 +26,30 @@
 >       then _paint canvas pos c
 >       else return ()
 
-> repaint :: GameState -> IO ()
-> repaint gs = do
->   paint_level gs
->   paint_status gs
->   refresh
+> repaint :: GS ()
+> repaint = do
+>   paint_level
+>   paint_status
+>   liftIO $ refresh
 
-> paint_level :: GameState -> IO ()
-> paint_level gs = print_array_corner $ SA.runSTArray $ do
->   canvas <- MA.newArray (bounds gs) unseen_character
->   paint_terrain canvas (terrain gs) (range gs)
->   paint_objects canvas (objects gs) (range gs)
->   paint_vis_monsters canvas (line_of_sight gs)
->   paint_character canvas (player_location gs)
->   paint_unseen canvas (kaart gs) (range gs)
->   return canvas
+> paint_level :: GS ()
+> paint_level = do
+>   bs <- bounds
+>   t <- terrain
+>   poss <- all_positions
+>   objs <- objects
+>   los <- line_of_sight
+>   loc <- location
+>   k <- kaart
+>
+>   liftIO $ print_array_corner $ SA.runSTArray $ do
+>       canvas <- MA.newArray bs unseen_character
+>       paint_terrain canvas t poss
+>       paint_objects canvas objs poss
+>       paint_vis_monsters canvas los
+>       paint_character canvas loc
+>       paint_unseen canvas k poss
+>       return canvas
 
 > paint_terrain :: Canvas s -> Terrain -> [Pos] -> S s
 > paint_terrain canvas terrain poss =
@@ -66,12 +75,17 @@
 >       if kaart IA.! pos then return () else
 >       _paint canvas pos unseen_character
 
+
+
 Paint the status line at bottom.
 
-> paint_status :: GameState -> IO ()
-> paint_status gs = do
->   (_, y) <- get_screen_size
->   print_string 0 (y - 1) (status_line gs ++ "      ")
+> paint_status :: GS ()
+> paint_status = do
+>   (_, y) <- liftIO $ get_screen_size
+>   line <- status_line
+>   liftIO $ print_string 0 (y - 1) (line ++ "      ")
+
+
 
 How do we wish to represent different features as characters on screen?
 

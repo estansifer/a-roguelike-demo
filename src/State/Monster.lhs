@@ -1,5 +1,5 @@
 
-> module Monster (
+> module State.Monster (
 >       MonsterType(..),
 >       MovementType(..),
 >       max_health,

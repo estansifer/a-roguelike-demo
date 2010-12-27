@@ -3,7 +3,8 @@
 >       compute_valid_dirs,
 >       compute_shortest_paths,
 >       compute_los,
->       random_empty_location
+>       random_empty_location,
+>       random_empty_location_m
 >   ) where
 >
 > import Prelude hiding (floor)
@@ -16,9 +17,9 @@
 > import qualified Data.Array.MArray as MA
 > import Data.Array.ST (runSTArray, STArray)
 > import Data.STRef
-> import System.Random
 >
-> import Util.Util (arrayize, random_from, while)
+> import Util.Util (arrayize, while)
+> import Util.RandomM
 > import BasicDefs
 > import Util.Queue
 
@@ -105,19 +106,24 @@ that spans.
 >           $ get_los_path (x2 - x1, y2 - y1)
 
 > random_empty_location :: Terrain -> Int -> Pos
-> random_empty_location terrain seed = runST $ do
->   g_var <- newSTRef (mkStdGen seed)
->   _r' terrain g_var
+> random_empty_location terrain seed =
+>   runST $ run_str seed $ random_empty_location_m terrain
 >
-> _r' :: RandomGen g => Terrain -> STRef s g -> ST s Pos
-> _r' terrain g_var = do
->   pos <- random_location terrain g_var
->   case terrain IA.! pos of
->       Floor -> return pos
->       Wall -> _r' terrain g_var
+> random_empty_location_m :: RandomM m => Terrain -> m Pos
+> random_empty_location_m terrain = f
+>   where
+>       f :: RandomM m => m Pos
+>       f = do
+>           pos <- random_location_m terrain_range
+>           case terrain IA.! pos of
+>               Floor -> return pos
+>               Wall -> f
 >
-> random_location :: RandomGen g => Grid a -> STRef s g -> ST s Pos
-> random_location grid g_var = do
->   x <- random_from (1, grid_width grid) g_var
->   y <- random_from (1, grid_height grid) g_var
+>       terrain_range :: (Pos, Pos)
+>       terrain_range = IA.bounds terrain
+>   
+> random_location_m :: RandomM m => (Pos, Pos) -> m Pos
+> random_location_m ((xlow, ylow), (xhigh, yhigh)) = do
+>   x <- randomR (xlow, xhigh)
+>   y <- randomR (ylow, yhigh)
 >   return (x, y)

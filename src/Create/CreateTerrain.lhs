@@ -70,8 +70,8 @@ in the array is either Floor or Wall.
 
 The outer border of the level is guaranteed to be all walls.
 
-> create_terrain :: I -> I -> Int -> Terrain
-> create_terrain w h seed =
+> create_terrain :: (I, I) -> Int -> Terrain
+> create_terrain (w, h) seed =
 >   if w < 3 || h < 3 then error "Dimensions of level are too small" else
 >   runSTArray $ run_str seed $ do
 >       l <- lift $ newArray ((1, 1), (w, h)) Floor
