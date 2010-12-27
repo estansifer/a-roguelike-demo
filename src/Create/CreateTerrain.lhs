@@ -5,15 +5,12 @@
 
 > import Prelude hiding (floor)
 
-> import Control.Monad.ST
 > import Control.Monad (forM, forM_)
 > import Data.Array.MArray
 > import Data.Array.ST
-> import Data.STRef
 >
 > import BasicDefs
 > import Util.RandomM
->   (random, randomR, random_weighted_bool, branch, wbranch, STR, lift, run_str)
 
 > hallway_chance = 0.07
 > hole_density = 0.012

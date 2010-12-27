@@ -3,14 +3,13 @@
 >       create_objects
 >   ) where
 
-> import Control.Monad.ST
+> import Control.Monad.ST (runST)
 > import qualified Data.Array.IArray as IA
-> import Data.STRef
 
+> import BasicDefs
 > import Util.Util (arrayizeM)
 > import Util.RandomM
-> import BasicDefs
-> import TerrainComputation (random_empty_location)
+> import TerrainComputation (random_empty_location_m)
 
 > food_density      = 0.0015
 > scroll_density    = 0.001
@@ -22,7 +21,7 @@
 
 > num :: Double -> STR s Int
 > num p = do
->   wbranch p (num (next_p p) >>= fmap (+ 1)) (return 0)
+>   wbranch p (fmap (+ 1) $ num $ next_p p) (return 0)
 
 > create_object_stack :: STR s [Object]
 > create_object_stack = do
@@ -34,7 +33,7 @@
 
 > create_stairs :: Terrain -> Objects -> STR s Objects
 > create_stairs terrain objects = do
->   pos <- random_empty_location_m
+>   pos <- random_empty_location_m terrain
 >   let o = objects IA.! pos
 >   return $ objects IA.// [(pos, o ++ [Stairs])]
 
