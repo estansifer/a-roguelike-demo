@@ -1,5 +1,5 @@
 
-> module CreateTerrain (
+> module Create.CreateTerrain (
 >       create_terrain
 >   ) where
 
@@ -10,10 +10,10 @@
 > import Data.Array.MArray
 > import Data.Array.ST
 > import Data.STRef
-> import System.Random
 >
 > import BasicDefs
-> import Util.Util (random_from, random_weighted_bool, branch, wbranch)
+> import Util.RandomM
+>   (random, randomR, random_weighted_bool, branch, wbranch, STR, lift, run_str)
 
 > hallway_chance = 0.07
 > hole_density = 0.012
@@ -25,12 +25,12 @@ Consider a room, one of whose interior dimensions is of size 'length'.  We
 randomly choose whether or not to subdivide that room along that dimension,
 and if so, at what point to place the dividing wall (0-indexed).
 
-> choose_div_point :: RandomGen g => I -> STRef s g -> ST s (Maybe I)
-> choose_div_point length g_var =
+> choose_div_point :: I -> STR s (Maybe I)
+> choose_div_point length =
 >   if length < 5
 >       then return Nothing
->       else wbranch g_var hallway_chance
->           (branch g_var (return $ Just 1) (return $ Just (length - 2)))
+>       else wbranch hallway_chance
+>           (branch (return $ Just 1) (return $ Just (length - 2)))
 >           (let p = 
 >                   if length >= 30 then 1    else
 >                   if length >= 25 then 0.9  else
@@ -43,8 +43,8 @@ and if so, at what point to place the dividing wall (0-indexed).
 >                   if length == 6 then 0.35 else
 >                   if length == 5 then 0.1  else
 >                   0.1 in
->           wbranch g_var p
->               (fmap Just $ random_from (2, length - 3) g_var)
+>           wbranch p
+>               (fmap Just $ randomR (2, length - 3))
 >               (return Nothing))
 
 Suppose we are placing a wall of size 'length' to subdivide a room into
@@ -53,13 +53,13 @@ a door to place in that wall.
 
 The length of the wall must be at least 2.
 
-> choose_door_placement :: RandomGen g => I -> STRef s g -> ST s (I, I)
-> choose_door_placement length g_var =
+> choose_door_placement :: I -> STR s (I, I)
+> choose_door_placement length =
 >   if length < 2 then error "Wall is too short to place door" else do
 >       let min_door_size = 2
 >       let max_door_size = max 2 (length `div` 3)
->       door_size <- random_from (min_door_size, max_door_size) g_var
->       door_location <- random_from (0, length - door_size) g_var
+>       door_size <- randomR (min_door_size, max_door_size)
+>       door_location <- randomR (0, length - door_size)
 >       return (door_location, door_size)
 
 
@@ -74,20 +74,19 @@ in the array is either Floor or Wall.
 The outer border of the level is guaranteed to be all walls.
 
 > create_terrain :: I -> I -> Int -> Terrain
-> create_terrain w h s =
+> create_terrain w h seed =
 >   if w < 3 || h < 3 then error "Dimensions of level are too small" else
->   runSTArray $ do
->       g_var <- newSTRef (mkStdGen s)
->       l <- newArray ((1, 1), (w, h)) Floor
+>   runSTArray $ run_str seed $ do
+>       l <- lift $ newArray ((1, 1), (w, h)) Floor
 >       paint_x l Wall 1 (1, h)
 >       paint_x l Wall w (1, h)
 >       paint_y l Wall 1 (1, w)
 >       paint_y l Wall h (1, w)
 >
->       place_room l g_var (2, 2) (w - 2) (h - 2)
+>       place_room l (2, 2) (w - 2) (h - 2)
 >
->       place_holes l w h g_var
->       place_pillars l w h g_var
+>       place_holes l w h
+>       place_pillars l w h
 >
 >       return l
 
@@ -95,84 +94,81 @@ The outer border of the level is guaranteed to be all walls.
 > m_maybe Nothing _ = return ()
 > m_maybe (Just x) k = k x
 
-> place_room :: RandomGen g => MGrid s T -> STRef s g -> Pos -> I -> I -> ST s ()
-> place_room l g_var (x, y) width height =
+> place_room :: MGrid s T -> Pos -> I -> I -> STR s ()
+> place_room l (x, y) width height =
 >   if width < 2 || height < 2 then return () else
 >   let p = case width `compare` height of
 >               GT -> cut_larger_dimension
 >               EQ -> 0.5
 >               LT -> 1 - cut_larger_dimension
->   in wbranch g_var p
+>   in wbranch p
 >       (do
->           m_div_x <- choose_div_point width g_var
+>           m_div_x <- choose_div_point width
 >           m_maybe m_div_x $ \div_x -> do
 >               paint_x l Wall (x + div_x) (y, y + height - 1)
->               place_x_doors l g_var (x + div_x, y) height
->               place_room l g_var (x, y) div_x height
->               place_room l g_var (x + div_x + 1, y) (width - div_x - 1) height)
+>               place_x_doors l (x + div_x, y) height
+>               place_room l (x, y) div_x height
+>               place_room l (x + div_x + 1, y) (width - div_x - 1) height)
 >       (do
->           m_div_y <- choose_div_point height g_var
+>           m_div_y <- choose_div_point height
 >           m_maybe m_div_y $ \div_y -> do
 >               paint_y l Wall (y + div_y) (x, x + width - 1)
->               place_y_doors l g_var (x, y + div_y) width
->               place_room l g_var (x, y) width div_y
->               place_room l g_var (x, y + div_y + 1) width (height - div_y - 1))
+>               place_y_doors l (x, y + div_y) width
+>               place_room l (x, y) width div_y
+>               place_room l (x, y + div_y + 1) width (height - div_y - 1))
 
-> place_x_doors :: RandomGen g => MGrid s T -> STRef s g -> Pos -> I -> ST s ()
-> place_x_doors l g_var (x, y) height = do
->   (door_loc, door_size) <- choose_door_placement height g_var
+> place_x_doors :: MGrid s T -> Pos -> I -> STR s ()
+> place_x_doors l (x, y) height = do
+>   (door_loc, door_size) <- choose_door_placement height
 >   paint_x l Floor x (y + door_loc, y + door_loc + door_size - 1)
->   wbranch g_var bonus_door_prob
->       (place_x_doors l g_var (x, y) height)
+>   wbranch bonus_door_prob
+>       (place_x_doors l (x, y) height)
 >       (return ())
 
-> place_y_doors :: RandomGen g => MGrid s T -> STRef s g -> Pos -> I -> ST s ()
-> place_y_doors l g_var (x, y) width = do
->   (door_loc, door_size) <- choose_door_placement width g_var
+> place_y_doors :: MGrid s T -> Pos -> I -> STR s ()
+> place_y_doors l (x, y) width = do
+>   (door_loc, door_size) <- choose_door_placement width
 >   paint_y l Floor y (x + door_loc, x + door_loc + door_size - 1)
->   wbranch g_var bonus_door_prob
->       (place_y_doors l g_var (x, y) width)
+>   wbranch bonus_door_prob
+>       (place_y_doors l (x, y) width)
 >       (return ())
 
-> paint :: MGrid s T -> T -> (I, I) -> (I, I) -> ST s ()
+> paint :: MGrid s T -> T -> (I, I) -> (I, I) -> STR s ()
 > paint l t (a, b) (c, d) =
 >   if c < a || d < b then return () else do
 >   forM_ [a..c] $ \x ->
 >       forM_ [b..d] $ \y ->
->           writeArray l (x, y) t
+>           lift $ writeArray l (x, y) t
 
-> paint_x :: MGrid s T -> T -> I -> (I, I) -> ST s ()
+> paint_x :: MGrid s T -> T -> I -> (I, I) -> STR s ()
 > paint_x l t x (y1, y2) =
 >   if (y2 < y1) then return () else do
 >   forM_ [y1..y2] $ \y ->
->       writeArray l (x, y) t
+>       lift $ writeArray l (x, y) t
 
-> paint_y :: MGrid s T -> T -> I -> (I, I) -> ST s ()
+> paint_y :: MGrid s T -> T -> I -> (I, I) -> STR s ()
 > paint_y l t y (x1, x2) =
 >   if (x2 < x1) then return () else do
 >   forM_ [x1..x2] $ \x ->
->       writeArray l (x, y) t
+>       lift $ writeArray l (x, y) t
 
-> set :: MGrid s T -> Pos -> T -> ST s ()
-> set = writeArray
+> set :: MGrid s T -> Pos -> T -> STR s ()
+> set grid pos val = lift $ writeArray grid pos val
 
-> place_holes :: RandomGen g => MGrid s T -> I -> I -> STRef s g -> ST s ()
-> place_holes l w h g_var =
+> place_holes :: MGrid s T -> I -> I -> STR s ()
+> place_holes l w h =
 >   forM_ [2 .. (w - 1)] $ \x ->
 >       forM_ [2..(h - 1)] $ \y -> do
->           wbranch g_var hole_density (set l (x, y) Floor) (return ())
+>           wbranch hole_density (set l (x, y) Floor) (return ())
 
-> place_pillars :: RandomGen g => MGrid s T -> I -> I -> STRef s g -> ST s ()
-> place_pillars l w h g_var =
+> place_pillars :: MGrid s T -> I -> I -> STR s ()
+> place_pillars l w h =
 >   forM_ [2..(w - 1)] $ \x ->
 >       forM_ [2..(h - 1)] $ \y -> do
->           make_pillar <- random_weighted_bool pillar_density g_var
+>           make_pillar <- random_weighted_bool pillar_density
 >           o <- opening l x y
 >           if make_pillar && o then set l (x, y) Wall else return ()
 
-> opening :: MGrid s T -> I -> I -> ST s Bool
+> opening :: MGrid s T -> I -> I -> STR s Bool
 > opening l x y = fmap (all is_floor) $
->   forM [(a, b) | a <- [x-1..x+1], b <- [y-1..y+1]] $ readArray l
-
-demo :: I -> I -> Int -> IO ()
-demo w h s = putStr $ pretty_print_level $ create_terrain w h s
+>   forM [(a, b) | a <- [x-1..x+1], b <- [y-1..y+1]] $ lift . readArray l
