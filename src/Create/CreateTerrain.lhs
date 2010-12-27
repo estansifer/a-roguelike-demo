@@ -95,42 +95,42 @@ The outer border of the level is guaranteed to be all walls.
 > m_maybe (Just x) k = k x
 
 > place_room :: MGrid s T -> Pos -> I -> I -> STR s ()
-> place_room l (x, y) width height =
->   if width < 2 || height < 2 then return () else
->   let p = case width `compare` height of
+> place_room l (x, y) dx dy =
+>   if dx < 2 || dy < 2 then return () else
+>   let p = case dx `compare` dy of
 >               GT -> cut_larger_dimension
 >               EQ -> 0.5
 >               LT -> 1 - cut_larger_dimension
 >   in wbranch p
 >       (do
->           m_div_x <- choose_div_point width
+>           m_div_x <- choose_div_point dx
 >           m_maybe m_div_x $ \div_x -> do
->               paint_x l Wall (x + div_x) (y, y + height - 1)
->               place_x_doors l (x + div_x, y) height
->               place_room l (x, y) div_x height
->               place_room l (x + div_x + 1, y) (width - div_x - 1) height)
+>               paint_x l Wall (x + div_x) (y, y + dy - 1)
+>               place_x_doors l (x + div_x, y) dy
+>               place_room l (x, y) div_x dy
+>               place_room l (x + div_x + 1, y) (dx - div_x - 1) dy)
 >       (do
->           m_div_y <- choose_div_point height
+>           m_div_y <- choose_div_point dy
 >           m_maybe m_div_y $ \div_y -> do
->               paint_y l Wall (y + div_y) (x, x + width - 1)
->               place_y_doors l (x, y + div_y) width
->               place_room l (x, y) width div_y
->               place_room l (x, y + div_y + 1) width (height - div_y - 1))
+>               paint_y l Wall (y + div_y) (x, x + dx - 1)
+>               place_y_doors l (x, y + div_y) dx
+>               place_room l (x, y) dx div_y
+>               place_room l (x, y + div_y + 1) dx (dy - div_y - 1))
 
 > place_x_doors :: MGrid s T -> Pos -> I -> STR s ()
-> place_x_doors l (x, y) height = do
->   (door_loc, door_size) <- choose_door_placement height
+> place_x_doors l (x, y) dy = do
+>   (door_loc, door_size) <- choose_door_placement dy
 >   paint_x l Floor x (y + door_loc, y + door_loc + door_size - 1)
 >   wbranch bonus_door_prob
->       (place_x_doors l (x, y) height)
+>       (place_x_doors l (x, y) dy)
 >       (return ())
 
 > place_y_doors :: MGrid s T -> Pos -> I -> STR s ()
-> place_y_doors l (x, y) width = do
->   (door_loc, door_size) <- choose_door_placement width
+> place_y_doors l (x, y) dx = do
+>   (door_loc, door_size) <- choose_door_placement dx
 >   paint_y l Floor y (x + door_loc, x + door_loc + door_size - 1)
 >   wbranch bonus_door_prob
->       (place_y_doors l (x, y) width)
+>       (place_y_doors l (x, y) dx)
 >       (return ())
 
 > paint :: MGrid s T -> T -> (I, I) -> (I, I) -> STR s ()
