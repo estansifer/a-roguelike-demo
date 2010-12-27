@@ -1,0 +1,6 @@
+*.hi
+*.o
+/bin/
+
+# files created by vim... yeah, I know this belongs elsewhere, but this is easier
+.*.swp
