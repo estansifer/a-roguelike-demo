@@ -13,14 +13,15 @@
 >       objects,
 >       creatures_data,
 >       creatures,
->       player_id,
+>       player,
 >       location,
 >       line_of_sight,
 >       shortest_paths,
 >
 >       set_kaart,
 >       set_objects,
->       set_monsters,
+>       set_creatures,
+>       modify_creatures,
 >       set_player,
 >       set_location,
 >       set_line_of_sight,
@@ -146,8 +147,8 @@ Assumes the game is currently uninitialized.
 > kaart :: GS Kaart
 > kaart = get_ kaart_
 
-> player_id :: GS CID
-> player_id = get_ player_id_
+> player :: GS CID
+> player = get_ player_
 
 > location :: GS Pos
 > location = get_ player_location_
@@ -185,8 +186,13 @@ Assumes the game is currently uninitialized.
 > set_creatures :: Creatures -> GS ()
 > set_creatures c = modify_state (\s -> s {creatures_ = c})
 
+> modify_creatures :: (Creatures -> Creatures) -> GS ()
+> modify_creatures f = creatures_data >>= set_creatures . f
+
+TODO -- there's more to it than just this
+
 > set_location :: Pos -> GS ()
-> set_location l = modify_state (\s -> s {player_location_ = l})
+> set_location l = error "unimplemented" -- modify_state (\s -> s {player_location_ = l})
 
 > set_line_of_sight :: LOS -> GS ()
 > set_line_of_sight los = modify_state (\s -> s {line_of_sight_ = los})

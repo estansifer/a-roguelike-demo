@@ -78,7 +78,7 @@ The remaining fields are intimately linked to the player state, and must
 be updated on every movement of the player.  Some of the arrays could
 be replaced with IO arrays for greater efficiency.
 
->       player_id_          :: CID,
+>       player_             :: Player,
 >       player_location_    :: Pos,
 >       line_of_sight_      :: LOS,
 >       shortest_paths_     :: Pathing

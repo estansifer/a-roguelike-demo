@@ -21,6 +21,7 @@
 > import Control.Concurrency.MVar
 >
 > import Defs
+> import StupidClasses
 > import State.Health
 > import State.XP
 >
@@ -32,14 +33,18 @@
 >   Human |
 >   WithHuman |
 >   Timed |
->   TimedWave
+>   TimedWave |
+>   TimedAndWithHuman
 >
 > data Species = Species {
 >       creature_type :: CreatureType,
 >       movement_type :: [MovementType],
 >       species_texture :: Char,
 >       xp_reward :: Int,
->       max_health :: Int
+>       max_damage :: Int,
+>       max_health :: Int,
+>       min_depth :: Int,
+>       scarcity :: Int
 >   }
 >
 > data Creature = Creature {
@@ -53,6 +58,15 @@
 >       cids :: IntMap Creature,
 >       locs :: Grid (MVar CID)
 >   }
+>
+> instance Timeful Creature where
+>   step c = c {health = step (health c)}
+>
+> instance Potionable Creature where
+>   drink_poition c = c {health = drink_potion (health c)}
+>
+> instance Levelable Creature where
+>   level_up c = c {health = level_up (heatlh c)}
 >
 > empty_pos :: Creatures -> Pos -> IO Bool
 > empty_pos cs p = isEmptyVar (locs cs IA.! p)

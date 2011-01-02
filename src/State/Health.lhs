@@ -1,8 +1,9 @@
 
 > module State.Health (
->       Health(hp, max_hp),
->       heal_step, heal_potion, level_up_health
+>       Health(hp, max_hp)
 >   ) where
+
+> import StupidClasses
 
 > max_regen_time = 20
 > time_to_full_health = 450
@@ -33,3 +34,12 @@
 > level_up_health :: Health -> Health
 > level_up_health h = h {max_hp = max_hp', hp = min max_hp' (hp h + 3)} where
 >   max_hp' = max_hp h + 4
+
+> instance Timeful Health where
+>   step = heal_step
+
+> instance Potionable Health where
+>   drink_potion = heal_potion
+
+> instance Levelable Health where
+>   level_up = level_up_health

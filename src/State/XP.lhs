@@ -4,7 +4,6 @@
 >       gain_xp
 >   ) where
 >
->
 > data XP = XP {
 >       xp_points :: Int,
 >       xp_level :: Int
