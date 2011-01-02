@@ -4,11 +4,11 @@
 > import System.Random
 > import Control.Concurrent.MVar
 >
-> import State.GameState
+> import State.State
 > import Util.InputStream
 > import Output
 > import Util.CursesWrapper
-> import Util.Flag
+> import Util.Signal
 > import PlayerCommand
 > import Action.PerformCommand
 
@@ -16,17 +16,18 @@
 > main :: IO ()
 > main = wrap_main $ do
 >   (x, y) <- get_screen_size
->   (signal_quit, block_on_quit) <- make_flag
+>   quit_flag <- new_flag
 >   input_stream <- input_stream_char
->   run_game (x, y - 1) $ initialize_game >> main_loop input_stream signal_quit
->   block_on_quit
+>   let quit = liftIO $ raise_flag quit_flag
+>   run_game (x, y - 1) $ initialize_game >> main_loop input_stream quit
+>   block_on_flag quit_flag
 
 Note that even on illegal commands the screen repaints.
 
-> main_loop :: MVar Char -> IO () -> GS ()
-> main_loop input_stream signal_quit = do
+> main_loop :: MVar Char -> GS () -> GS ()
+> main_loop input_stream quit = do
 >   repaint
 >   pc <- liftIO $ next_command input_stream
 >   if pc == Quit
->       then liftIO signal_quit
->       else perform_command_if_legal pc >> main_loop input_stream signal_quit
+>       then quit
+>       else perform_command_if_legal pc >> main_loop input_stream quit

@@ -11,8 +11,9 @@
 > import Data.STRef
 >
 > import Util.CursesWrapper
-> import BasicDefs
-> import State.GameState
+> import Defs
+> import State.State
+> import State.Creature
 
 > type Canvas s = SA.STArray s Pos Char
 > type S s = ST s ()
@@ -39,7 +40,7 @@
 >   poss <- all_positions
 >   objs <- objects
 >   los <- line_of_sight
->   loc <- location
+>   cs <- creatures
 >   k <- kaart
 >
 >   liftIO $ print_array_corner $ SA.runSTArray $ do
@@ -47,7 +48,7 @@
 >       paint_terrain canvas t poss
 >       paint_objects canvas objs poss
 >       paint_vis_monsters canvas los
->       paint_character canvas loc
+>       mapM_ (paint_creature canvas) cs
 >       paint_unseen canvas k poss
 >       return canvas
 
@@ -66,8 +67,14 @@
 > paint_vis_monsters :: Canvas s -> LOS -> S s
 > paint_vis_monsters canvas los = return ()
 
+Unused.  The player is a particular species now.
+
 > paint_character :: Canvas s -> Pos -> S s
 > paint_character canvas pos = _paint canvas pos player_character
+
+> paint_creature :: Canvas s -> Creature -> S s
+> paint_creature canvas creature =
+>   _paint canvas (location creature) (species_texture $ species creature)
 
 > paint_unseen :: Canvas s -> Kaart -> [Pos] -> S s
 > paint_unseen canvas kaart poss =
@@ -88,6 +95,9 @@ Paint the status line at bottom.
 
 
 How do we wish to represent different features as characters on screen?
+
+(The textures associated with the different species are stored in
+their Species record, which are defined in various files.)
 
 > unseen_character :: Char
 > unseen_character = ' '

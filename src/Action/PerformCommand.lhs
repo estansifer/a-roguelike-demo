@@ -17,7 +17,8 @@
 > import TerrainComputation
 > import PlayerCommand
 > import State.Player
-> import State.GameState
+> import State.State
+> import State.MState
 
 
 ** Constants **
@@ -27,8 +28,11 @@
 
 
 
+The operation 'perform_command_if_legal' is atomic;  it takes a global
+lock before performing any actions.
+
 > perform_command_if_legal :: PlayerCommand -> GS ()
-> perform_command_if_legal pc = do
+> perform_command_if_legal !pc = lock $ do
 >   legal <- is_legal_command pc
 >   if legal then perform_command pc else return ()
 
@@ -59,8 +63,9 @@
 >       Read -> read
 >       Down -> descend_level
 >       Quit -> error "Quit is not a legal action"
+>   move_normal_monsters
 >   age_player
->   age_environment
+>   age_monsters
 
 > move :: Dir -> GS ()
 > move dir = do
@@ -121,5 +126,8 @@ update line of sight, kaart, and shortest paths
 > age_player :: GS ()
 > age_player = modify_player step_time
 
-> age_environment :: GS ()
-> age_environment = return ()
+> move_normal_monsters :: GS ()
+> move_normal_monsters = return ()
+
+> age_monsters :: GS ()
+> age_monsters = return ()

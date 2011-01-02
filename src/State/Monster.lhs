@@ -46,6 +46,10 @@ TimedWave:  the monster moves in short bursts, as a function of real time
 > monster_max_attack Kobold = 2
 > monster_max_attack Emu = 5
 
+> monster_texture :: MonsterType -> Char
+> monster_texture Kobold = 'K'
+> monster_texture Emu = 'E'
+
 > data Monster = Monster {
 >       monster_type :: MonsterType,
 >       monster_location :: Pos,
