@@ -20,7 +20,7 @@
 >
 >       set_kaart,
 >       set_objects,
->       set_creatures,
+>       set_creatures_data,
 >       modify_creatures,
 >       set_player,
 >       set_location,
@@ -183,11 +183,11 @@ Assumes the game is currently uninitialized.
 > set_objects :: Objects -> GS ()
 > set_objects o = modify_state (\s -> s {objects_ = o})
 
-> set_creatures :: Creatures -> GS ()
-> set_creatures c = modify_state (\s -> s {creatures_ = c})
+> set_creatures_data :: Creatures -> GS ()
+> set_creatures_data c = modify_state (\s -> s {creatures_ = c})
 
 > modify_creatures :: (Creatures -> Creatures) -> GS ()
-> modify_creatures f = creatures_data >>= set_creatures . f
+> modify_creatures f = creatures_data >>= set_creatures_data . f
 
 TODO -- there's more to it than just this
 
@@ -209,10 +209,7 @@ TODO -- there's more to it than just this
 > increment_depth = dungeon_depth >>= set_depth . (+1)
 
 > set_random_terrain :: GS ()
-> set_random_terrain = do
->   s <- random
->   d <- dims
->   set_terrain (create_terrain d s)
+> set_random_terrain = dims >>= set_terrain . create_terrain_m
 
 > set_random_location :: GS ()
 > set_random_location = (terrain >>= random_empty_location_m) >>= set_location

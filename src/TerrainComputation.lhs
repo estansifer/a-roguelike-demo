@@ -3,8 +3,8 @@
 >       compute_valid_dirs,
 >       compute_shortest_paths,
 >       compute_los,
->       random_empty_location,
->       random_empty_location_m
+>       random_open_location,
+>       random_open_location_m
 >   ) where
 >
 > import Prelude hiding (floor)
@@ -15,13 +15,12 @@
 > import qualified Data.Array
 > import qualified Data.Array.IArray as IA
 > import qualified Data.Array.MArray as MA
-> import Data.Array.ST (runSTArray, STArray)
-> import Data.STRef
+> import Data.Array.ST (runSTArray)
 >
-> import Util.Util (arrayize, while)
+> import Util.Util (arrayize, while, repeat_until)
 > import Util.RandomM
-> import BasicDefs
 > import Util.Queue
+> import Defs
 
 This is used to store the line of sight calculations of 'los_path' in an array.
 If the actual width or height exceeded these bounds, then we would get an
@@ -95,9 +94,6 @@ that spans.
 > get_los_path :: Pos -> [Pos]
 > get_los_path pos = los_path_array IA.! pos
 
-> compute_los' :: Terrain -> Pos -> LOS
-> compute_los' terrain _ = arrayize (const True) (IA.bounds terrain)
-
 > compute_los :: Terrain -> Pos -> LOS
 > compute_los terrain start@(x1, y1) = arrayize in_los (IA.bounds terrain) where
 >   in_los :: Pos -> Bool
@@ -105,22 +101,12 @@ that spans.
 >       and $ map (is_floor . (terrain IA.!) . add_dir start)
 >           $ get_los_path (x2 - x1, y2 - y1)
 
-> random_empty_location :: Terrain -> Int -> Pos
-> random_empty_location terrain seed =
->   runST $ run_str seed $ random_empty_location_m terrain
+> random_open_location :: Terrain -> Int -> Pos
+> random_open_location terrain seed = purify $ random_open_location_m terrain
 >
-> random_empty_location_m :: RandomM m => Terrain -> m Pos
-> random_empty_location_m terrain = f
->   where
->       f :: RandomM m => m Pos
->       f = do
->           pos <- random_location_m terrain_range
->           case terrain IA.! pos of
->               Floor -> return pos
->               Wall -> f
->
->       terrain_range :: (Pos, Pos)
->       terrain_range = IA.bounds terrain
+> random_open_location_m :: RandomM m => Terrain -> m Pos
+> random_open_location_m terrain =
+>   repeat_until (random_location_m (IA.bounds terrain)) ((==Floor) . (terrain IA.!))
 >   
 > random_location_m :: RandomM m => (Pos, Pos) -> m Pos
 > random_location_m ((xlow, ylow), (xhigh, yhigh)) = do

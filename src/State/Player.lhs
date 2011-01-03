@@ -7,7 +7,6 @@
 >       alive,
 >       has_scroll, has_potion,
 >       drink_potion, read_scroll,
->       Inventory(..)
 >   ) where
 >
 > import Defs
@@ -32,19 +31,6 @@
 >       xp_level = 1,
 >       hunger = max_hunger `div` 2
 >   }
-
-> data Inventory = Inventory {
->       num_potions :: Int,
->       num_scrolls :: Int
->   }
-
-> empty_inventory = Inventory {num_potions = 0, num_scrolls = 0}
-
-> add_potions :: Inventory -> Int -> Inventory
-> add_potions i d = i {num_potions = num_potions i + d}
-
-> add_scrolls :: Inventory -> Int -> Inventory
-> add_scrolls i d = i {num_scrolls = num_scrolls i + d}
 
 > step_time :: Player -> Player
 > step_time p =

@@ -7,7 +7,8 @@
 >       random_weighted_bool,
 >       branch, wbranch,
 >       STR, lift,
->       run_str
+>       run_str,
+>       purify
 >   ) where
 
 > import Data.STRef
@@ -80,3 +81,6 @@ We need a seed value for initializing the random number generator.
 > run_str seed str = do
 >   g_var <- newSTRef $ mkStdGen seed
 >   runReaderT str g_var
+
+> purify :: Int -> STR s a -> a
+> purify seed str = runST $ run_str seed str

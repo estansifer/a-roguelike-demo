@@ -7,7 +7,7 @@
 >
 > import Control.Concurrent.MVar
 >
-> import BasicDefs
+> import Defs
 > import Util.InputStream
 
 > data PlayerCommand =

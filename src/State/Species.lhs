@@ -1,16 +1,36 @@
 
 > module State.Species (
+>       CreatureType(..),
+>       MovementType(..),
+>       Species(..),
 >       human,
 >       kobold, emu, snake, jabberwocky,
 >       all_species
 >   ) where
 
-> import State.Creature
-
+> data CreatureType = Protagonist | Monster
+>
+> data MovementType =
+>   Human |
+>   WithHuman |
+>   Timed |
+>   TimedWave
+>
+> data Species = Species {
+>       creature_type :: CreatureType,
+>       movement_type :: [MovementType],
+>       species_texture :: Char,
+>       xp_reward :: Int,
+>       max_damage :: Int,
+>       max_health :: Int,
+>       min_depth :: Int,
+>       scarcity :: Int
+>   }
+>
 > human :: Species
 > human = Species {
 >       creature_type = Protagonist,
->       movement_type = Human,
+>       movement_type = [Human],
 >       species_texture = '@',
 >       xp_reward = 0,
 >       max_damage = 5,
@@ -22,7 +42,7 @@
 > kobold :: Species
 > kobold = Species {
 >       creature_type = Monster,
->       movement_type = WithHuman,
+>       movement_type = [WithHuman],
 >       species_texture = 'K',
 >       xp_reward = 2,
 >       max_damage = 2,
@@ -34,7 +54,7 @@
 > emu :: Species 
 > emu = Species {
 >       creature_type = Monster,
->       movement_type = Timed,
+>       movement_type = [Timed],
 >       species_texture = 'E',
 >       xp_reward = 4,
 >       max_damage = 5,
@@ -46,7 +66,7 @@
 > snake :: Species
 > snake = Species {
 >       creature_type = Monster,
->       movement_type = TimedWave,
+>       movement_type = [TimedWave],
 >       species_texture = 'S',
 >       xp_reward = 7,
 >       max_damage = 2,
@@ -58,7 +78,7 @@
 > jabberwocky :: Species
 > jabberwocky = Species {
 >       creature_type = Monster,
->       movement_type = TimedAndWithHuman,
+>       movement_type = [WithHuman, Timed],
 >       species_texture = 'J',
 >       xp_reward = 11,
 >       max_damage = 4,

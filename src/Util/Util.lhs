@@ -9,7 +9,8 @@
 >       branch, wbranch,
 >       seed, more_seeds, rng,
 >       while,
->       loop
+>       loop,
+>       repeat_until, repeat_while
 >   ) where
 
 > import Ix (Ix, range)
@@ -112,3 +113,15 @@ Repeat the given action 'body' forever.
 
 > loop :: Monad m => m a -> m b
 > loop body = body >> loop body
+
+> repeat_until :: Monad m => m a -> (a -> m Bool) -> m a
+> repeat_until body condition = do
+>   a <- body
+>   b <- condition a
+>   if b then return a else repeat_until body condition
+
+> repeat_while :: Monad m => m a -> (a -> m Bool) -> m a
+> repeat_while body condition = do
+>   a <- body
+>   b <- condition a
+>   if b then repeat_while body condition else return a

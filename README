@@ -1,1 +1,75 @@
-example readme... trying out github
+
+
+Modules
+
+    Defs
+    Demo2
+    Output
+    PlayerCommand
+    StupidClasses
+    TerrainComputation
+
+    Action/
+        MoveMonster
+        PerformCommand
+        SpawnMonster
+
+    Create/
+        Objects
+        Terrain
+
+    State/
+        Creature
+        Health
+        Inventory
+        MState
+        Player
+        Species
+        State
+        XP
+
+    Util/
+        CursesWrapper
+        InputStream
+        Lock
+        Queue
+        RandomM
+        Signal
+        Util
+
+
+Terminology
+
+    A 'creatures' is either the player or a monster.
+
+    A location is 'open' if it has floor terrain.
+    A location is 'empty' if it has floor terrain and no creatures.
+
+
+Dependencies
+
+    Low-level:
+
+        Util.Util has no dependencies.
+        Util.* have no dependencies outside of Util.*.
+
+        Defs and StupidClasses have no dependencies.
+
+        PlayerCommand and TerrainComputation depend only on Defs and Util.*.
+
+    Static level (State.*):
+
+        Health -> ()
+        XP -> ()
+        Species -> ()
+        Creature -> Health, XP, Species
+
+        Inventory -> ()
+        Player -> Creature, Inventory
+
+        State -> Creature, Player
+        MState -> State
+
+    Dynamic level (Action.*, Create.*, Output)
+
+        blah blah
