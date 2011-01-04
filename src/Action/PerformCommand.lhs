@@ -3,129 +3,70 @@
 >       perform_command
 >   ) where
 
-> import Prelude hiding (read)
-
-> import Control.Monad.ST
-> import qualified Data.Array.IArray as IA
-> import Ix
->
-> import BasicDefs
-> import Util.Util (arrayize)
-> import Util.RandomM
+> import Defs
 > import TerrainComputation
 > import PlayerCommand
 > import State.Player
 > import State.State
 > import State.MState
+> import Action.Player
+> import Action.Initialization
+> import Action.SpawnMonster
 
-
-** Constants **
-
-> phase_door_range = 10
-
-
-
-
-The operation 'perform_command_if_legal' is atomic;  it takes a global
-lock before performing any actions.
 
 > perform_command :: PlayerCommand -> GS ()
 > perform_command !pc = do
 >   legal <- is_legal_command pc
 >   if legal then perform_legal_command pc else return ()
 
-** Is legal command? **
-
 > is_legal_command :: PlayerCommand -> GS Bool
 > is_legal_command pc = do
->   vd <- valid_dirs
->   loc <- location
->   p <- player
->   objs <- objects
+>   a <- alive
+>   if not a then return False else do
+>       valid_dirs <- get_valid_dirs
+>       loc <- get_player_location
+>       player <- get_player
+>       objects <- get_objects
 >
->   return ((alive p) && (case pc of
->       Move dir -> dir `elem` (vd IA.! loc)
->       Drink -> has_potion p
->       Read -> has_scroll p
->       Down -> Stairs `elem` (objs IA.! loc)
->       Quit -> False))
+>       return (case pc of
+>           Move dir -> dir `elem` (valid_dirs IA.! loc)
+>           Drink -> has_potion player
+>           Read -> has_scroll player
+>           Down -> Stairs `elem` (objects IA.! loc)
+>           Quit -> False))
 
-
-** Modifying game state **
 
 > perform_legal_command :: PlayerCommand -> GS ()
 > perform_legal_command pc = do
 >   case pc of
 >       Move dir -> move dir
 >       Drink -> drink
->       Read -> read
->       Down -> descend_level
+>       Read -> scroll
+>       Down -> descend_level -- TODO
 >       Quit -> error "Quit is not a legal action"
->   move_normal_monsters
+>   age_normal_monsters
 >   age_player
->   age_monsters
+>   maybe_spawn_normal_monsters
 
 > move :: Dir -> GS ()
 > move dir = do
 >   loc <- location
->   set_location (loc `add_dir` dir)
+>   move_player_to (loc `add_dir` dir)
 >   update_arrays
 >   pick_up_objects
 
-update line of sight, kaart, and shortest paths
-
-> update_arrays :: GS ()
-> update_arrays = do
->   bs <- bounds
->   t <- terrain
->   vd <- valid_dirs
->   k <- kaart
->   loc <- location
->
->   let new_los = compute_los t loc
->       new_k pos = (k IA.! pos) || (new_los IA.! pos)
->
->   set_kaart $ arrayize new_k bs
->   set_line_of_sight new_los
->   set_shortest_paths (compute_shortest_paths vd loc)
-
 > pick_up_objects :: GS ()
 > pick_up_objects = do
->   objs <- objects
->   loc <- location
+>   objects <- get_objects
+>   loc <- get_player_location
 >
->   let remove = filter (Stairs /=) (objs IA.! loc)
->   let stay   = filter (Stairs ==) (objs IA.! loc)
+>   let remove = filter (Stairs /=) (objects IA.! loc)
+>   let stay   = filter (Stairs ==) (objects IA.! loc)
 >   if null remove then return () else do
->       p <- player
->       set_player $ pick_up_objs p remove
->       set_objects $ objs IA.// [(loc, stay)]
+>       modify_player (flip pick_up_objs remove)
+>       set_objects $ objects IA.// [(loc, stay)]
 
-
-> drink :: GS ()
-> drink = modify_player drink_potion 
-
-> read :: GS ()
-> read = modify_player read_scroll >> phase_door
-
-> phase_door :: GS ()
-> phase_door = do
->   bs <- bounds
->   t <- terrain
->   loc <- location
->
->   dx <- randomR (-phase_door_range, phase_door_range)
->   dy <- randomR (-phase_door_range, phase_door_range)
->   let pos = loc `add_dir` (dx, dy)
->   if inRange bs pos && ((t IA.! pos) == Floor)
->       then move (dx, dy)
->       else phase_door
-
-> age_player :: GS ()
-> age_player = modify_player step_time
-
-> move_normal_monsters :: GS ()
-> move_normal_monsters = return ()
-
-> age_monsters :: GS ()
-> age_monsters = return ()
+> age_normal_monsters :: GS ()
+> age_normal_monsters = do
+>   cids <- get_cids_by_movement WithHuman
+>   mapM_ perform_monster_action cids

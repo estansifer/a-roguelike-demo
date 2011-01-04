@@ -11,6 +11,14 @@
 > food_nourishment = 250
 > potion_nourishment = 100
 
+> max_regen_time = 20
+> time_to_full_health = 450
+
+> min_potion_heal = 15
+> potion_heal_percent = 30
+
+> phase_door_range = 10
+
 
 The kobold is the most common creature, with scarcity 100.
 One kobold should appear at the beginning of a level per 200 squares of level.

@@ -18,6 +18,7 @@
 > import State.MState
 > import Action.Pause
 > import Action.SpawnMonster
+> import Action.Player
 
 > starting_depth :: Int
 > starting_depth = 1
@@ -76,9 +77,7 @@ none are placed in line-of-sight of the player.
 > place_character = do
 >   terrain <- get_terrain
 >   loc <- random_open_location_m terrain
->   set_player_location loc
->   cid <- get_player_cid
->   update_creature_location cid loc
+>   move_player_to loc
 
 > update_arrays :: GS ()
 > update_arrays = do

@@ -1,5 +1,5 @@
 
-> module SpawnMonster (
+> module Action.SpawnMonster (
 >       populate_monsters,
 >       spawn_monster,
 >       maybe_spawn_timed_monsters,
@@ -45,6 +45,7 @@
 >   clock_speed <- get_clock_speed
 >   signal <- make_signal mt clock_speed
 >   act_on_signal signal $ perform_monster_action cid
+>   modify_creature cid $ register_kill_signal signal
 
 > make_signal :: MovementType -> Int -> GS ()
 > make_signal Timed clock_speed = liftIO $ regular_signal clock_speed

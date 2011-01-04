@@ -1,6 +1,8 @@
 
 > module State.Inventory (
->       Inventory(..)
+>       Inventory(..),
+>       empty_inventory,
+>       add_potions, add_scrolls
 >   ) where
 
 > import StupidClasses

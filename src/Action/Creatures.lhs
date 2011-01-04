@@ -4,17 +4,20 @@
 >       get_creature,
 >       get_cid_at,
 >       get_creatures_list,
+>       get_cids_by_movement,
 >       is_empty_pos,
 >       new_creatures, reset_creatures,
->       create_creature_at,
+>       create_player, create_creature_at,
 >       update_creature_location,
 >       choose_path
 >   ) where
 
 > import qualified Data.Array.IArray as IA
 > import qualified Data.IntMap as IM
+> import qualified Data.Ix as Ix
 
 > import Util.Util (arrayizeM)
+> import StupidClasses
 > import State.Species
 > import State.Creature
 > import State.State
@@ -43,6 +46,12 @@
 > get_creatures_list = do
 >   creatures <- get_creatures
 >   return (IM.elems (cid_map creatures))
+
+> get_cids_by_movement :: MovementType -> GS [CID]
+> get_cids_by_movement mt = do
+>   creatures <- get_creatures
+>   return $ map fst $ filter (elem mt . species . snd) $
+>               IM.assocs $ cid_map creatures
 
 > is_empty_pos :: Pos -> GS Bool
 > is_empty_pos pos = do
@@ -94,7 +103,8 @@
 >   modify_creatures $ IM.insert cid $ Creature {
 >           species = sp,
 >           health = full_health sp,
->           location = pos
+>           location = pos,
+>           killed = False
 >       }
 >   creatures <- get_creatures
 >   putMVar (loc_map creatures IA.! pos) cid
@@ -124,3 +134,24 @@
 >   case dirs' of
 >       (dir:_) -> return dir
 >       [] -> return (0, 0)     -- should never happen, as (0, 0) is a valid dir
+
+> phase_door :: CID -> GS ()
+> phase_door cid = do
+>   creatures <- get_creatures
+>   bounds <- get_bounds
+>   terrain <- get_terrain
+>   pos <- location (cid_map creatures IM.! cid)
+>   new_pos <- repeat_until (\p -> do
+>               e <- is_empty_pos p
+>               return (e && Ix.inRange bounds p && (terrain IA.! p) == Floor))
+>                       (do
+>                           dx <- randomR (-phase_door_range, phase_door_range)
+>                           dy <- randomR (-phase_door_range, phase_door_range)
+>                           return (pos `add_dir` (dx, dy)))
+>   update_creature_location cid new_pos
+
+> creature_drink :: CID -> GS ()
+> creature_drink cid = modify_creature cid drink_potion
+
+> age_creature :: CID -> GS ()
+> age_creature cid = modify_creature cid step

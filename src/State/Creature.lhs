@@ -31,7 +31,9 @@
 > data Creature = Creature {
 >       species :: Species,
 >       health :: Health,
->       location :: Pos
+>       location :: Pos,
+>       killed :: Bool,
+>       kill_signals :: [Signal]
 >   }
 >
 > data Creatures = {
@@ -44,10 +46,10 @@
 >   step c = c {health = step (health c)}
 >
 > instance Potionable Creature where
->   drink_poition c = c {health = drink_potion (health c)}
+>   drink_potion c = c {health = drink_potion (health c)}
 >
 > instance Levelable Creature where
->   level_up c = c {health = level_up (heatlh c)}
+>   level_up c = c {health = level_up (health c)}
 >
 > full_health :: Species -> Health
 > full_health species = Health {

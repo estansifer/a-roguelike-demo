@@ -3,13 +3,8 @@
 >       Health(hp, max_hp)
 >   ) where
 
+> import Constants
 > import StupidClasses
-
-> max_regen_time = 20
-> time_to_full_health = 450
-
-> min_potion_heal = 15
-> potion_heal_percent = 30
 
 > data Health = Health {
 >       hp :: Int,

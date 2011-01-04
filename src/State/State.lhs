@@ -17,10 +17,10 @@
 > import qualified Control.Monad.Trans as CMT (liftIO)
 > import Control.Monad.Trans.Reader
 >
-> import BasicDefs
+> import Defs
 > import Util.RandomM
 > import Util.Lock
-> import Util.Signal
+> import Util.Flag
 > import State.Player
 > import State.Creature
 
@@ -192,5 +192,17 @@ then fork it.
 >   implicit <- ask
 >   liftIO $ forkIO $ runReaderT action implicit
 
-> act_on_signal :: Signal -> GS a -> GS ThreadId
-> act_on_signal signal action = fork_gs $ unforked_act_on_signal signal action
+> repeat_until_halted :: GS Int -> GS a -> GS (GS ())
+> repeat_until_halted = haltable_repeat fork_gs
+
+> regular_repeat_until_halted :: Int -> GS a -> GS (GS ())
+> regular_repeat_until_halted delay = repeat_until_halted (regular_delay delay)
+
+> sine_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (GS ())
+> sine_repeat_until_halted avg_delay period amplitude action = do
+>   rep <- make_sine_delay avg_delay period amplitude
+>   repeat_until_halted rep action
+
+> sine_sync_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (GS ())
+> sine_sync_repeat_until_halted avg_delay period amplitude =
+>   repeat_until_halted (sine_delay_sync avg_delay period amplitude)
