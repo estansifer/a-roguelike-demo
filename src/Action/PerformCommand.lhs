@@ -1,7 +1,5 @@
 
 > module Action.PerformCommand (
->       perform_command_if_legal,
->       is_legal_command,
 >       perform_command
 >   ) where
 
@@ -31,10 +29,10 @@
 The operation 'perform_command_if_legal' is atomic;  it takes a global
 lock before performing any actions.
 
-> perform_command_if_legal :: PlayerCommand -> GS ()
-> perform_command_if_legal !pc = lock $ do
+> perform_command :: PlayerCommand -> GS ()
+> perform_command !pc = do
 >   legal <- is_legal_command pc
->   if legal then perform_command pc else return ()
+>   if legal then perform_legal_command pc else return ()
 
 ** Is legal command? **
 
@@ -55,8 +53,8 @@ lock before performing any actions.
 
 ** Modifying game state **
 
-> perform_command :: PlayerCommand -> GS ()
-> perform_command pc = do
+> perform_legal_command :: PlayerCommand -> GS ()
+> perform_legal_command pc = do
 >   case pc of
 >       Move dir -> move dir
 >       Drink -> drink

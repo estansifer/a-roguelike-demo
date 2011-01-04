@@ -33,6 +33,9 @@
 >   t <- create_terrain_m dims
 >   loc <- random_open_location_m t
 >   let vd = compute_valid_dirs t
+>   let los = compute_los t loc
+>   let p = undefined -- create a new player
+>   let c = undefined -- create the creatures
 >
 >   return $ State {
 >           dims_               = dims,
@@ -44,9 +47,10 @@
 >           kaart_              = los,
 >           objects_            = objs,
 >           creatures_          = undefined,
->           player_             = undefined,
+>           player_             = p,
 >           player_location_    = loc,
->           
+>           line_of_sight_      = los,
+>           shortest_paths_     = compute_shortest_paths vd loc
 >       }
     
 

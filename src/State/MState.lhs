@@ -3,20 +3,21 @@
 >       initialize_game,
 >       descend_level,
 >
->       dims,
->       bounds,
->       all_positions,
->       dungeon_depth,
->       terrain,
->       valid_dirs,
->       kaart,
->       objects,
->       creatures_data,
->       creatures,
->       player,
->       location,
->       line_of_sight,
->       shortest_paths,
+>       get_dims,
+>       get_bounds,
+>       get_all_positions,
+>       get_dungeon_depth,
+>       get_terrain,
+>       get_valid_dirs,
+>       get_kaart,
+>       get_objects,
+>       get_creatures_data,
+>       get_creatures,
+>       get_player,
+>       get_location,
+>       get_line_of_sight,
+>       get_shortest_paths,
+>       get_paused_switch,
 >
 >       set_kaart,
 >       set_objects,
@@ -26,6 +27,7 @@
 >       set_location,
 >       set_line_of_sight,
 >       set_shortest_paths,
+>       set_paused_switch,
 >
 >       modify_player,
 >
@@ -35,7 +37,7 @@
 > import qualified Data.Array.IArray as IA
 > import qualified Ix
 >
-> import BasicDefs
+> import Defs
 > import Util.RandomM
 > import Create.CreateTerrain
 > import Create.CreateObjects
@@ -117,47 +119,50 @@ Assumes the game is currently uninitialized.
 > get_ f = fmap f get_state
 
 
-> dims :: GS Pos
-> dims = get_ dims_
+> get_dims :: GS Pos
+> get_dims = get_ dims_
 
-> bounds :: GS (Pos, Pos)
-> bounds = get_ bounds_
+> get_bounds :: GS (Pos, Pos)
+> get_bounds = get_ bounds_
 
-> all_positions :: GS [Pos]
-> all_positions = get_ all_positions_
+> get_all_positions :: GS [Pos]
+> get_all_positions = get_ all_positions_
 
-> dungeon_depth :: GS Int
-> dungeon_depth = get_ dungeon_depth_
+> get_dungeon_depth :: GS Int
+> get_dungeon_depth = get_ dungeon_depth_
 
-> terrain :: GS Terrain
-> terrain = get_ terrain_
+> get_terrain :: GS Terrain
+> get_terrain = get_ terrain_
 
-> valid_dirs :: GS ValidDirs
-> valid_dirs = get_ valid_dirs_
+> get_valid_dirs :: GS ValidDirs
+> get_valid_dirs = get_ valid_dirs_
 
-> objects :: GS Objects
-> objects = get_ objects_
+> get_objects :: GS Objects
+> get_objects = get_ objects_
 
-> creatures_data :: GS Creatures
-> creatures_data = get_ creatures_
+> get_creatures_data :: GS Creatures
+> get_creatures_data = get_ creatures_
 
-> creatures :: GS [Creature]
-> creatures = get_ (creatures_list . creatures_)
+> get_creatures :: GS [Creature]
+> get_creatures = get_ (creatures_list . creatures_)
 
-> kaart :: GS Kaart
-> kaart = get_ kaart_
+> get_kaart :: GS Kaart
+> get_kaart = get_ kaart_
 
-> player :: GS CID
-> player = get_ player_
+> get_player :: GS CID
+> get_player = get_ player_
 
-> location :: GS Pos
-> location = get_ player_location_
+> get_location :: GS Pos
+> get_location = get_ player_location_
 
-> line_of_sight :: GS LOS
-> line_of_sight = get_ line_of_sight_
+> get_line_of_sight :: GS LOS
+> get_line_of_sight = get_ line_of_sight_
 
-> shortest_paths :: GS Pathing
-> shortest_paths = get_ shortest_paths_
+> get_shortest_paths :: GS Pathing
+> get_shortest_paths = get_ shortest_paths_
+
+> get_paused_switch :: GS Flag
+> get_paused_switch = get_ paused_switch_
 
 
 > is_alive :: GS Bool
@@ -199,6 +204,9 @@ TODO -- there's more to it than just this
 
 > set_shortest_paths :: Pathing -> GS ()
 > set_shortest_paths p = modify_state (\s -> s {shortest_paths_ = p})
+
+> set_paused_switch :: Flag -> GS ()
+> set_paused_switch p = modify_state (\s -> s {paused_switch_ = p})
 
 
 

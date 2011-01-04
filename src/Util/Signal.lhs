@@ -3,6 +3,11 @@
 >       new_flag,
 >       raise_flag, block_on_flag, is_raised,
 >
+>       new_switch_off, new_switch_on,
+>       turn_on, turn_off,
+>       block_until_on, block_until_off,
+>       is_switch_on, is_switch_off,
+>
 >       Signal, act, halt, halt_all, unforked_act_on_signal,
 >       new_signal, regular_signal, sine_signal, sine_signal_sync
 >   ) where
@@ -16,6 +21,10 @@ for MonadIO:
 > import Control.Concurrent.MVar
 >
 > import Util.Util (loop)
+
+
+Flag
+
 
 The flag should be raised at
 most one time (if it is raised more, one of the operations will block
@@ -35,9 +44,62 @@ immediately if it has been raised, otherwise blocks until it is raised.
 > block_on_flag = readMVar
 
 > is_raised :: Flag -> IO Bool
-> is_raised = isEmptyMVar
+> is_raised = fmap not isEmptyMVar
 
 
+
+Switch
+
+> data Switch = Switch {
+>       on_flag :: MVar (),
+>       off_flag :: MVar ()
+>   }
+
+> new_switch_off :: IO Switch
+> new_switch_off = do
+>   on <- newEmptyMVar
+>   off <- newMVar ()
+>   return $ Switch {on_flag = on, off_flag = off}
+
+> new_switch_on :: IO Switch
+> new_switch_on = do
+>   on <- newMVar ()
+>   off <- newEmptyMVar
+>   return $ Switch {on_flag = on, off_flag = off}
+
+> turn_on :: Switch -> IO ()
+> turn_on switch = do
+>   takeMVar (off_flag switch)
+>   putMVar (on_flag switch) ()
+
+> turn_off :: Switch -> IO ()
+> turn_off switch = do
+>   takeMVar (on_flag switch)
+>   putMVar (off_flag switch) ()
+
+> block_until_on :: Switch -> IO ()
+> block_until_on switch = readMVar (on_flag switch)
+
+> block_until_off :: Switch -> IO ()
+> block_until_off switch = readMVar (off_flag switch)
+
+> is_switch_on :: Switch -> IO Bool
+> is_switch_on switch = do
+>   m_on <- tryTakeMVar (on_flag switch)
+>   case m_on of
+>       Just _ -> return True
+>       Nothing -> return False
+
+> is_switch_off :: Switch -> IO Bool
+> is_switch_off switch = do
+>   m_off <- tryTakeMVar (off_flag switch)
+>   case m_off of
+>       Just _ -> return True
+>       Nothing -> return False
+
+
+
+Signal
 
 > data Sign = Act | Halt
 > type Signal = MVar Sign

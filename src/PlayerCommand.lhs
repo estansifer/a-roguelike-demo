@@ -5,10 +5,8 @@
 >       next_command
 >   ) where
 >
-> import Control.Concurrent.MVar
->
 > import Defs
-> import Util.InputStream
+> import Util.Stream
 
 > data PlayerCommand =
 >   Move Dir |
@@ -40,9 +38,9 @@
 
 Blocks until a command is received on input.
 
-> next_command :: MVar Char -> IO PlayerCommand
+> next_command :: Stream Char -> IO PlayerCommand
 > next_command input_stream = do
->   c <- takeMVar input_stream
+>   c <- next_value input_stream
 >   case char_to_command c of
 >       Just pc -> return pc
 >       Nothing -> next_command input_stream

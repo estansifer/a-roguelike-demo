@@ -27,13 +27,6 @@
 
 
 
-** Constants **
-
-> _starting_depth = 1
-
-
-
-
 ** Game parameters (pure) **
 
 > type Parameters = (I, I)
@@ -81,7 +74,9 @@ be replaced with IO arrays for greater efficiency.
 >       player_             :: Player,
 >       player_location_    :: Pos,
 >       line_of_sight_      :: LOS,
->       shortest_paths_     :: Pathing
+>       shortest_paths_     :: Pathing,
+>
+>       paused_switch_      :: Switch
 >   }
 
 > data ImplicitState = ImplicitState {

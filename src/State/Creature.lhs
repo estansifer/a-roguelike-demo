@@ -31,13 +31,12 @@
 > data Creature = Creature {
 >       species :: Species,
 >       health :: Health,
->       location :: Pos,
->       cid :: CID
+>       location :: Pos
 >   }
 >
 > data Creatures = {
->       c_map :: IntMap Creature,
->       locs :: Grid (MVar CID),
+>       cid_map :: IntMap Creature,
+>       loc_map :: Grid (MVar CID),
 >       next_cid :: CID
 >   }
 >
@@ -57,30 +56,5 @@
 >       until_regen = 1
 >   }
 >
-> empty_pos :: Creatures -> Pos -> IO Bool
-> empty_pos cs p = isEmptyVar (locs cs IA.! p)
->
 > creatures_list :: Creatures -> [Creature]
 > creatures_list cs = IM.elems (c_map cs)
->
-> modify_creature :: CID -> (Creature -> Creature) -> Creatures -> Creatures
-> modify_creature cid f cs = cs {c_map = adjust f cid (c_map cs)}
->
-> update_creature_location :: CID -> Pos -> Creatures -> IO Creatures
-> update_creature_location cid p_new cs = let p_old = location (c_map cs ! cid) in do
->   var_old <- locs cs IA.! p_old
->   var_new <- locs cs IA.! p_new
->   tryTakeMVar var_old
->   tryPutMVar var_new cid
->   return $ modify_creature cid (\c -> c {location = p_new}) (c_map cs)
->
-> choose_path :: Pathing -> ValidDirs -> Creatures -> CID -> IO Dir
-> choose_path paths vds cs cid = do
->   let p0 = location (c_map cs ! cid)
->       d1 = snd $ paths IA.! p0
->       ds = d1 : sortBy (compare `on` (fst . (paths IA.!) . add_dir p0)) (vds IA.! p0)
->   es <- mapM (\d -> empty_pos cs (p0 `add_dir` d) || d == (0,0)) ds
->   let ds' = map fst $ filter snd $ zip ds es
->   case ds' of
->       (d:_) -> return d
->       [] -> return (0, 0)

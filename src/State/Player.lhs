@@ -9,11 +9,9 @@
 >       drink_potion, read_scroll,
 >   ) where
 >
+> import Constants
 > import Defs
-
-> max_hunger = 9999
-> food_nourishment = 250
-> potion_nourishment = 100
+> import StupidClasses
 
 > data Player = Player {
 >   player_cid :: CID,
@@ -22,6 +20,21 @@
 >   xp_level :: Int,
 >   hunger :: Int
 > }
+
+> new_player :: CID -> Player
+> new_player cid = Player {
+>       player_cid = cid,
+>       inventory = empty_inventory,
+>       xp = starting_xp,
+>       xp_level = starting_xp_level,
+>       hunger = starting_hunger
+>   }
+
+
+
+
+
+
 
 > new_player :: Player
 > new_player = Player {
