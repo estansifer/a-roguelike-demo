@@ -3,10 +3,12 @@
 >       main_game
 >   ) where
 
+> import Util.Util (loop)
 > import Util.InputStream
 > import Util.Stream
 > import State.Species
 > import State.State
+> import State.MState
 > import Action.Pause
 > import Action.Initialization
 
@@ -30,7 +32,7 @@
 >   fork_gs $ process_player_commands input_stream
 >   lock unpause
 >   block_until_paused
->   descend_level
+>   increment_depth
 
 
 > start_timed_events :: GS ()

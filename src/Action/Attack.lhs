@@ -1,5 +1,7 @@
 
 > module Action.Attack (
+>       player_attack,
+>       monster_attack
 >   ) where
 
 > import State.Health

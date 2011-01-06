@@ -137,8 +137,7 @@ We are using the fact that the player has no kill listeners registered on it.
 > choose_path cid = do
 >   pathing <- get_shortest_paths
 >   valid_dirs <- get_valid_dirs
->   creatures <- get_creatures
->   let pos = location (cid_map creatures IM.! cid)
+>   pos <- fmap location $ get_creature cid
 >   let dir0 = snd $ pathing IA.! pos
 >   let closest = compare `on` (fst . (pathing IA.!) . add_dir pos)
 >   let dirs = dir0 : sortBy closest (valid_dirs IA.! pos)

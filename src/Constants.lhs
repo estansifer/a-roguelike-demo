@@ -20,6 +20,8 @@
 > phase_door_range = 10
 
 
+> smelling_range_squared = 15 * 15
+
 The minimum length of time between repaints of the screen, in microseconds.
 
 > repaint_interval = 100000

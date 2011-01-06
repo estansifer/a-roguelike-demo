@@ -9,7 +9,7 @@
 >
 >       grid_width, grid_height,
 >
->       flip_dir, flip_x_dir, flip_y_dir, swap_x_y, add_dir,
+>       flip_dir, flip_x_dir, flip_y_dir, swap_x_y, add_dir, sub_pos,
 >       compute_valid_dirs_at,
 >
 >       pretty_print_level, pretty_print_char_grid
@@ -75,6 +75,12 @@ Grid height and width.
 
 > add_dir :: Pos -> Dir -> Pos
 > add_dir (a, b) (c, d) = (a + c, b + d)
+
+> sub_pos :: Pos -> Pos -> Dir
+> sub_pos (a, b) (c, d) = (a - c, b - d)
+
+> norm :: Dir -> I
+> norm (a, b) = a * a + b * b
 
 Given the terrain 't' and a position 'p', returns a list of all directions
 from to 'p', including the zero direction.  Assumes that if 'p' is on the
