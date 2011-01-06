@@ -1,5 +1,6 @@
 
 > {-# LANGUAGE TypeSynonymInstances #-}
+> {-# LANGUAGE Rank2Types #-}
 >
 > module Util.RandomM (
 >       RandomM(..),
@@ -82,5 +83,5 @@ We need a seed value for initializing the random number generator.
 >   g_var <- newSTRef $ mkStdGen seed
 >   runReaderT str g_var
 
-> purify :: Int -> STR s a -> a
+> purify :: Int -> (forall s. STR s a) -> a
 > purify seed str = runST $ run_str seed str

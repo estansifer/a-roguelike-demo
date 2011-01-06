@@ -10,6 +10,7 @@
 >       grid_width, grid_height,
 >
 >       flip_dir, flip_x_dir, flip_y_dir, swap_x_y, add_dir, sub_pos,
+>       norm,
 >       compute_valid_dirs_at,
 >
 >       pretty_print_level, pretty_print_char_grid

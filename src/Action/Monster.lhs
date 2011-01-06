@@ -7,8 +7,10 @@
 
 > import Defs
 > import Constants
+> import State.Creature
 > import State.State
-> import Action.Creature
+> import State.MState
+> import Action.Creatures
 > import Action.Attack
 
 Monster behavior:
@@ -39,5 +41,5 @@ killed.
 >           else return ()
 >   age_creature cid
 
-> move_towards_player :: CID -> Pos -> GS ()
+> move_towards_player :: CID -> GS ()
 > move_towards_player cid = choose_path cid >>= update_creature_location cid

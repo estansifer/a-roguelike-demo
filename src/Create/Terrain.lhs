@@ -71,8 +71,8 @@ in the array is either Floor or Wall.
 
 The outer border of the level is guaranteed to be all walls.
 
-> create_terrain_m :: RandomM m => (I, I) -> Terrain
-> create_terrain_m dims = random >>= create_terrain dims
+> create_terrain_m :: RandomM m => (I, I) -> m Terrain
+> create_terrain_m dims = random >>= return . create_terrain dims
 
 > create_terrain :: (I, I) -> Int -> Terrain
 > create_terrain (w, h) seed =

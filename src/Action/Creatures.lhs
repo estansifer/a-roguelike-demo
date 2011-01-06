@@ -8,6 +8,7 @@
 >       get_cids_by_movement,
 >       is_empty_pos,
 >       new_creatures, reset_creatures,
+>       modify_creature,
 >       create_player, create_creature_at,
 >       update_creature_location,
 >       choose_path,
@@ -21,10 +22,20 @@
 > import qualified Data.IntMap as IM
 > import qualified Data.Ix as Ix
 
-> import Util.Util (arrayizeM)
+> import Data.Function (on)
+> import Data.List (sortBy)
+> import Control.Concurrent
+> import Control.Monad (forM)
+
+> import Util.Util (arrayizeM, repeat_until)
+> import Util.RandomM
+> import Constants
+> import Defs
 > import StupidClasses
 > import State.Species
+> import State.Health
 > import State.Creature
+> import State.Player
 > import State.State
 > import State.MState
 
@@ -42,9 +53,9 @@
 > get_cid_at pos = do
 >   creatures <- get_creatures
 >   let mvar = loc_map creatures IA.! pos
->   m_cid <- tryTakeMVar mvar
+>   m_cid <- liftIO $ tryTakeMVar mvar
 >   case m_cid of
->       Just cid -> putMVar mvar cid >> return m_cid
+>       Just cid -> liftIO $ putMVar mvar cid >> return m_cid
 >       Nothing -> return m_cid
 
 > get_creatures_list :: GS [Creature]
@@ -58,18 +69,18 @@
 > get_cids_by_movement :: MovementType -> GS [CID]
 > get_cids_by_movement mt = do
 >   creatures <- get_creatures
->   return $ map fst $ filter (elem mt . species . snd) $
+>   return $ map fst $ filter (elem mt . movement_type . species . snd) $
 >               IM.assocs $ cid_map creatures
 
 > is_empty_pos :: Pos -> GS Bool
 > is_empty_pos pos = do
 >   creatures <- get_creatures
->   isEmptyVar (loc_map creatures IA.! pos)
+>   liftIO $ isEmptyMVar (loc_map creatures IA.! pos)
 
 > new_creatures :: GS ()
 > new_creatures = do
 >   bounds <- get_bounds
->   l_map <- arrayizeM newEmptyMVar bounds
+>   l_map <- liftIO $ arrayizeM (const newEmptyMVar) bounds
 >   set_creatures $ Creatures {
 >           cid_map = IM.empty,
 >           loc_map = l_map,
@@ -85,12 +96,12 @@
 
 We are using the fact that the player has no kill listeners registered on it.
 
->   listIO $ sequence
+>   liftIO $ sequence
 >       [k | c <- IM.elems (cid_map old_creatures), k <- kill_listeners c]
 >
 >   bounds <- get_bounds
->   l_map <- arrayizeM newEmptyMVar bounds
->   putMVar (l_map IA.! loc) cid
+>   l_map <- liftIO $ arrayizeM (const newEmptyMVar) bounds
+>   liftIO $ putMVar (l_map IA.! loc) cid
 >   set_creatures $ Creatures {
 >           cid_map = IM.singleton cid (cid_map old_creatures IM.! cid),
 >           loc_map = l_map,
@@ -108,29 +119,32 @@ We are using the fact that the player has no kill listeners registered on it.
 >   }
 
 > create_player :: GS CID
-> create_player = create_creature_at Human (1, 1)
+> create_player = create_creature_at human (1, 1)
 
 > create_creature_at :: Species -> Pos -> GS CID
 > create_creature_at sp pos = do
 >   cid <- unique_cid
->   modify_creatures $ IM.insert cid $ Creature {
->           species = sp,
->           health = full_health sp,
->           location = pos,
->           killed = False
->       }
 >   creatures <- get_creatures
->   putMVar (loc_map creatures IA.! pos) cid
+>   set_creatures $ creatures {cid_map = 
+>           IM.insert cid (Creature {
+>               species = sp,
+>               health = full_health sp,
+>               location = pos,
+>               killed = False,
+>               kill_listeners = []
+>           }) (cid_map creatures)
+>       }
+>   liftIO $ putMVar (loc_map creatures IA.! pos) cid
 >   return cid
 
 > update_creature_location :: CID -> Pos -> GS ()
 > update_creature_location cid p_new = do
 >   creatures <- get_creatures
->   let p_old = location (cid_map creatures ! cid)
->   var_old <- loc_map creatures IA.! p_old
->   var_new <- loc_map creatures IA.! p_new
->   tryTakeMVar var_old
->   tryPutMVar var_new cid
+>   let p_old = location (cid_map creatures IM.! cid)
+>   let var_old = loc_map creatures IA.! p_old
+>   let var_new = loc_map creatures IA.! p_new
+>   liftIO $ tryTakeMVar var_old
+>   liftIO $ tryPutMVar var_new cid
 >   modify_creature cid (\c -> c {location = p_new})
 
 > choose_path :: CID -> GS Dir
@@ -141,7 +155,8 @@ We are using the fact that the player has no kill listeners registered on it.
 >   let dir0 = snd $ pathing IA.! pos
 >   let closest = compare `on` (fst . (pathing IA.!) . add_dir pos)
 >   let dirs = dir0 : sortBy closest (valid_dirs IA.! pos)
->   emptys <- mapM (\dir -> is_empty_pos (pos `add_dir` dir) || d == (0, 0)) dirs
+>   emptys <- forM dirs $ \dir ->
+>       fmap (|| (dir == (0, 0))) (is_empty_pos (pos `add_dir` dir))
 >   let dirs' = map fst $ filter snd $ zip dirs emptys
 >   case dirs' of
 >       (dir:_) -> return dir
@@ -152,24 +167,25 @@ We are using the fact that the player has no kill listeners registered on it.
 >   creatures <- get_creatures
 >   bounds <- get_bounds
 >   terrain <- get_terrain
->   pos <- location (cid_map creatures IM.! cid)
->   new_pos <- repeat_until (\p -> do
+>   let pos = location (cid_map creatures IM.! cid)
+>   new_pos <- repeat_until
+>           (do
+>               dx <- randomR (-phase_door_range, phase_door_range)
+>               dy <- randomR (-phase_door_range, phase_door_range)
+>               return (pos `add_dir` (dx, dy)))
+>           (\p -> do
 >               e <- is_empty_pos p
 >               return (e && Ix.inRange bounds p && (terrain IA.! p) == Floor))
->                       (do
->                           dx <- randomR (-phase_door_range, phase_door_range)
->                           dy <- randomR (-phase_door_range, phase_door_range)
->                           return (pos `add_dir` (dx, dy)))
 >   update_creature_location cid new_pos
 
-> deal_damage :: CID -> Int -> GS Bool
+> deal_damage :: CID -> Integer -> GS Bool
 > deal_damage cid amount = do
 >   c <- get_creature cid
 >   if (killed c) then return False else do
 >       let c' = c {health = take_damage amount (health c)}
 >       if hp (health c') < 0
 >           then do
->               sequence $ kill_listeners c'
+>               liftIO $ sequence $ kill_listeners c'
 >               modify_creature cid (const (c'{killed = True}))
 >               return True
 >           else do

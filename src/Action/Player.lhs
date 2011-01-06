@@ -3,11 +3,19 @@
 >       modify_player,
 >       get_player_cid,
 >       age_player, alive,
->       scroll, drink
+>       scroll, drink,
+>       move_player_to
 >   ) where
 
+> import StupidClasses
 > import Constants
 > import Defs
+> import State.Health
+> import State.Creature
+> import State.Player
+> import State.State
+> import State.MState
+> import Action.Creatures
 
 > modify_player :: (Player -> Player) -> GS ()
 > modify_player f = modify_state $ (\s -> s {player_ = f (player_ s)})

@@ -1,12 +1,13 @@
 
-> module Util.Stream {
+> module Util.Stream (
 >       Stream(),
 >       make_stream,
 >       is_ready,
 >       block_until_ready,
 >       next_value,
->       try_next_value
->   }
+>       try_next_value,
+>       drop_pending_values
+>   ) where
 
 > import Control.Concurrent
 
@@ -70,7 +71,7 @@ will not block.
 >   () <- takeMVar (ready stream)
 >   return value
 
-> try_next_value :: Stream a -> IO (Just a)
+> try_next_value :: Stream a -> IO (Maybe a)
 > try_next_value stream = do
 >   m_value <- tryTakeMVar (values stream)
 >   case m_value of

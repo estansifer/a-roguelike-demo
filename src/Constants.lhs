@@ -17,9 +17,11 @@
 > min_potion_heal = 15
 > potion_heal_percent = 30
 
+> phase_door_range :: Int
 > phase_door_range = 10
 
 
+> smelling_range_squared :: Int
 > smelling_range_squared = 15 * 15
 
 The minimum length of time between repaints of the screen, in microseconds.
@@ -29,6 +31,7 @@ The minimum length of time between repaints of the screen, in microseconds.
 The kobold is the most common creature, with scarcity 100.
 One kobold should appear at the beginning of a level per 200 squares of level.
 
+> scarcity_per :: Num a => a
 > scarcity_per = 200 * 100
 
 Number of turns it would take for monster spawning to regenerate the
@@ -42,4 +45,5 @@ Must be strictly less than 1.
 
 In microseconds.
 
+> wave_period :: Int
 > wave_period = 1500000

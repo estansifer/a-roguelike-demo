@@ -1,8 +1,10 @@
 
 > module Util.Flag (
+>       Flag,
 >       new_flag,
 >       raise_flag, block_on_flag, is_raised,
 >
+>       Switch(),
 >       new_switch_off, new_switch_on,
 >       turn_on, turn_off,
 >       block_until_on, block_until_off,
@@ -46,7 +48,7 @@ immediately if it has been raised, otherwise blocks until it is raised.
 > block_on_flag = readMVar
 
 > is_raised :: Flag -> IO Bool
-> is_raised = fmap not isEmptyMVar
+> is_raised = fmap not . isEmptyMVar
 
 
 
@@ -113,25 +115,25 @@ Switch
 >       fork body
 >       return (raise_flag halt_flag)
 
-> regular_delay :: Monad m => Int -> m ()
-> regular_delay delay_amount = threadDelay delay_amount
+> regular_delay :: MonadIO m => Int -> m ()
+> regular_delay delay_amount = liftIO $ threadDelay delay_amount
 
-> make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (m Int)
+> make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (m ())
 > make_sine_delay avg_delay period amplitude = liftIO $ do
 >   start_time <- getCPUTime
 >   return $ liftIO $ do
 >       cur_time <- getCPUTime
->       let dt = (fromInteger (cur_time - start_time)) / 1000000.
->       threadDelay $ calc_sine_delay avg_delay period amplitude dt
+>       let dt = (fromInteger (cur_time - start_time)) / 1000000.0
+>       liftIO $ threadDelay $ calc_sine_delay avg_delay period amplitude dt
 
-> sine_delay_sync :: MonadIO m => Int -> Int -> Double -> m Int
+> sine_delay_sync :: MonadIO m => Int -> Int -> Double -> m ()
 > sine_delay_sync avg_delay period amplitude = liftIO $ do
 >   cur_time <- getCPUTime
->   let dt = (fromInteger cur_time) / 1000000.
->   threadDelay $ calc_sine_delay avg_delay period amplitude dt
+>   let dt = (fromInteger cur_time) / 1000000.0
+>   liftIO $ threadDelay $ calc_sine_delay avg_delay period amplitude dt
 
 > calc_sine_delay :: Int -> Int -> Double -> Double -> Int
 > calc_sine_delay avg_delay period amp dt =
 >   let k = 2 * pi / fi period :: Double in
->   round $ (fi avg_delay / (amp * sin (fi dt * k) + 1.0)) where
+>   round $ (fi avg_delay / (amp * sin (dt * k) + 1.0)) where
 >       fi = fromIntegral

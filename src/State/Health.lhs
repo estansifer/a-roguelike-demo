@@ -1,6 +1,6 @@
 
 > module State.Health (
->       Health(hp, max_hp),
+>       Health(..),
 >       take_damage
 >   ) where
 
@@ -8,21 +8,21 @@
 > import StupidClasses
 
 > data Health = Health {
->       hp :: Int,
->       max_hp :: Int,
->       until_regen :: Int
+>       hp :: Integer,
+>       max_hp :: Integer,
+>       until_regen :: Integer
 >   }
 
-> take_damage :: Int -> Health -> Health
+> take_damage :: Integer -> Health -> Health
 > take_damage amount h = h{hp = (hp h) - amount}
 
-> regen_time :: Int -> Int
+> regen_time :: Integer -> Integer
 > regen_time max_hp = min max_regen_time (time_to_full_health `div` max_hp)
 
 > heal_step :: Health -> Health
 > heal_step h =
->   if hp h >= max_hp then h else
->   if until_regen <= 1
+>   if hp h >= max_hp h then h else
+>   if until_regen h <= 1
 >       then h {hp = hp h + 1, until_regen = regen_time (max_hp h)}
 >       else h {until_regen = until_regen h - 1}
 

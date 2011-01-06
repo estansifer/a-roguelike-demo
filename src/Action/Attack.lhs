@@ -4,12 +4,17 @@
 >       monster_attack
 >   ) where
 
+> import Util.RandomM
+> import Defs
 > import State.Health
+> import State.Species
 > import State.Creature
 > import State.State
 > import State.MState
+> import Action.Creatures
+> import Action.Player
 
-> damage_amt :: RandomM m => CID -> m Int
+> damage_amt :: CID -> GS Integer
 > damage_amt cid = do
 >   creature <- get_creature cid
 >   randomR (0, max_damage $ species creature)

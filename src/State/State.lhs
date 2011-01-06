@@ -6,9 +6,11 @@
 >       Phase(..),
 >       State(..),
 >       GS, liftIO, 
+>       get_parameters,
 >       run_game,
+>       get_clock_speed,
 >       get_phase, set_phase,
->       get_state, set_state,
+>       get_state, modify_state, set_state,
 >       get_last_repaint, set_last_repaint,
 >       lock, fork_gs,
 >       repeat_until_halted,
@@ -19,6 +21,8 @@
 
 > import System.Random (randomIO, randomRIO)
 > import System.CPUTime
+> import Control.Concurrent
+> import Data.IORef
 >
 > -- from the transformers library
 > import qualified Control.Monad.Trans as CMT (liftIO)
@@ -55,7 +59,7 @@ and 'EndCondition' so that the end game state is exposed.
 >       bounds_             :: (Pos, Pos),
 >       all_positions_      :: [Pos],
 >
->       dungeon_depth_      :: Int,
+>       dungeon_depth_      :: Integer,
 >
 
 We would need to include a random number generator to gain pure behavior,
@@ -128,8 +132,14 @@ name we use).  Thus we can perform IO actions in the GS monad.
 
 
 
-> parameters :: GS Parameters
-> parameters = asks parameters_
+
+TODO -- put in parameters
+
+> get_clock_speed :: GS Int
+> get_clock_speed = return 1000000
+
+> get_parameters :: GS Parameters
+> get_parameters = asks parameters_
 >
 > phase_var :: GS (MVar Phase)
 > phase_var = asks phase_var_
@@ -191,8 +201,8 @@ This must be single-threaded.
 
 
 
-> get_last_repaint_ :: GS Integer
-> get_last_repaint_ = last_repaint_var >>= liftIO . readIORef
+> get_last_repaint :: GS Integer
+> get_last_repaint = last_repaint_var >>= liftIO . readIORef
 
 > set_last_repaint :: GS ()
 > set_last_repaint = do
@@ -208,7 +218,7 @@ This must be single-threaded.
 Given an action in the GS monad, turn it into an action in the IO monad, and
 then fork it.
 
-> fork_gs :: GS a -> GS ThreadId
+> fork_gs :: GS () -> GS ThreadId
 > fork_gs action = do
 >   implicit <- ask
 >   liftIO $ forkIO $ runReaderT action implicit

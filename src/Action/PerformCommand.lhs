@@ -3,19 +3,26 @@
 >       perform_command
 >   ) where
 
+> import qualified Data.Array.IArray as IA
+
 > import Defs
 > import TerrainComputation
 > import PlayerCommand
+> import State.Species
 > import State.Player
 > import State.State
 > import State.MState
+> import Action.Creatures
 > import Action.Player
 > import Action.Initialization
 > import Action.SpawnMonster
+> import Action.Pause
+> import Action.Attack
+> import Action.Monster
 
 
 > perform_command :: PlayerCommand -> GS ()
-> perform_command !pc = do
+> perform_command pc = do
 >   legal <- is_legal_command pc
 >   if legal then perform_legal_command pc else return ()
 
@@ -33,7 +40,7 @@
 >           Drink -> has_potion player
 >           Read -> has_scroll player
 >           Down -> Stairs `elem` (objects IA.! loc)
->           Quit -> False))
+>           Quit -> False)
 
 
 > perform_legal_command :: PlayerCommand -> GS ()
@@ -51,6 +58,7 @@
 > go_in_direction :: Dir -> GS ()
 > go_in_direction dir =
 >   if dir == (0, 0) then pick_up_objects else do
+>   loc <- get_player_location
 >   m_cid <- get_cid_at (loc `add_dir` dir)
 >   case m_cid of
 >       Just cid -> player_attack cid
@@ -58,7 +66,7 @@
 
 > move :: Dir -> GS ()
 > move dir = do
->   loc <- location
+>   loc <- get_player_location
 >   move_player_to (loc `add_dir` dir)
 >   update_arrays
 >   pick_up_objects

@@ -4,21 +4,21 @@
 >       new_player,
 >       pick_up_obj, pick_up_objs,
 >       eat,
->       has_scroll, has_potion,
->       drink_potion, read_scroll,
->       pick_up_obj, pick_up_objs
+>       has_scroll, has_potion
 >   ) where
 >
 > import Constants
 > import Defs
 > import StupidClasses
+> import State.Creature
+> import State.Inventory
 
 > data Player = Player {
 >   player_cid :: CID,
 >   inventory :: Inventory,
->   xp :: Int,
->   xp_level :: Int,
->   hunger :: Int
+>   xp :: Integer,
+>   xp_level :: Integer,
+>   hunger :: Integer
 > }
 
 > new_player :: CID -> Player

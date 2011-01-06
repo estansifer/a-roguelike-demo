@@ -11,17 +11,17 @@
 
 > import Util.Util (arrayize)
 > import Constants
+> import TerrainComputation
 > import Create.Terrain
 > import Create.Objects
 > import State.Species
+> import State.Player
 > import State.State
 > import State.MState
 > import Action.Pause
 > import Action.SpawnMonster
 > import Action.Player
-
-> starting_depth :: Int
-> starting_depth = 1
+> import Action.Creatures
 
 > initialize_state :: GS ()
 > initialize_state = do
@@ -32,7 +32,7 @@
 >           dims_ = params,
 >           bounds_ = bounds,
 >           all_positions_ = Ix.range bounds,
->           dungeon_depth_ = starting_depth,
+>           dungeon_depth_ = starting_depth
 >       }
 >   new_creatures
 
@@ -87,7 +87,7 @@ none are placed in line-of-sight of the player.
 >   location <- get_player_location
 >   old_kaart <- get_kaart
 >
->   let new_los = compute_los terrain locatoin
+>   let new_los = compute_los terrain location
 >       f_new_kaart pos = (old_kaart IA.! pos) || (new_los IA.! pos)
 >   set_kaart $ arrayize f_new_kaart bounds
 >   set_line_of_sight new_los

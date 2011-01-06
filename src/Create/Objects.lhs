@@ -10,7 +10,7 @@
 > import Defs
 > import Util.Util (arrayizeM)
 > import Util.RandomM
-> import TerrainComputation (random_empty_location_m)
+> import TerrainComputation (random_open_location_m)
 
 > food_density      = 0.0015
 > scroll_density    = 0.001
@@ -34,7 +34,7 @@
 
 > create_stairs :: Terrain -> Objects -> STR s Objects
 > create_stairs terrain objects = do
->   pos <- random_empty_location_m terrain
+>   pos <- random_open_location_m terrain
 >   let o = objects IA.! pos
 >   return $ objects IA.// [(pos, o ++ [Stairs])]
 
@@ -44,7 +44,7 @@ will appear in any empty location with equal likelihood.  Objects
 tend towards being stacked.  Exactly one location will have stairs.
 
 > create_objects_m :: RandomM m => Terrain -> m Objects
-> create_objects_m terrain = random >>= create_objects terrain
+> create_objects_m terrain = random >>= return . create_objects terrain
 
 > create_objects :: Terrain -> Int -> Objects
 > create_objects terrain seed = runST $ run_str seed $ do

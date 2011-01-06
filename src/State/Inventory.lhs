@@ -8,16 +8,16 @@
 > import StupidClasses
 
 > data Inventory = Inventory {
->       num_potions :: Int,
->       num_scrolls :: Int
+>       num_potions :: Integer,
+>       num_scrolls :: Integer
 >   }
 
 > empty_inventory = Inventory {num_potions = 0, num_scrolls = 0}
 
-> add_potions :: Inventory -> Int -> Inventory
+> add_potions :: Inventory -> Integer -> Inventory
 > add_potions i d = i {num_potions = num_potions i + d}
 
-> add_scrolls :: Inventory -> Int -> Inventory
+> add_scrolls :: Inventory -> Integer -> Inventory
 > add_scrolls i d = i {num_scrolls = num_scrolls i + d}
 
 > instance Potionable Inventory where

@@ -8,23 +8,23 @@
 >       all_species
 >   ) where
 
-> data CreatureType = Protagonist | Monster
+> data CreatureType = Protagonist | Monster deriving (Eq)
 >
 > data MovementType =
 >   Human |
 >   WithHuman |
 >   Timed |
->   TimedWave
+>   TimedWave deriving (Eq)
 >
 > data Species = Species {
 >       creature_type :: CreatureType,
 >       movement_type :: [MovementType],
 >       species_texture :: Char,
->       xp_reward :: Int,
->       max_damage :: Int,
->       max_health :: Int,
->       min_depth :: Int,
->       scarcity :: Int
+>       xp_reward :: Integer,
+>       max_damage :: Integer,
+>       max_health :: Integer,
+>       min_depth :: Integer,
+>       scarcity :: Integer
 >   }
 >
 > human :: Species

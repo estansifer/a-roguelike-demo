@@ -102,11 +102,13 @@ that spans.
 >           $ get_los_path (x2 - x1, y2 - y1)
 
 > random_open_location :: Terrain -> Int -> Pos
-> random_open_location terrain seed = purify $ random_open_location_m terrain
+> random_open_location terrain seed = purify seed $ random_open_location_m terrain
 >
 > random_open_location_m :: RandomM m => Terrain -> m Pos
 > random_open_location_m terrain =
->   repeat_until (random_location_m (IA.bounds terrain)) ((==Floor) . (terrain IA.!))
+>   repeat_until
+>       (random_location_m (IA.bounds terrain))
+>       (return . (==Floor) . (terrain IA.!))
 >   
 > random_location_m :: RandomM m => (Pos, Pos) -> m Pos
 > random_location_m ((xlow, ylow), (xhigh, yhigh)) = do

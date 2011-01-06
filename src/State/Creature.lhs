@@ -1,17 +1,10 @@
 
 > module State.Creature (
 >       CID,
->       CreatureType(..),
->       MovementType(..),
->       Species(..),
 >       Creature(..),
->       Creatures(),
+>       Creatures(..),
 >       full_health,
->       empty_pos,
->       creatures_list,
->       modify_creature,
->       update_creature_location,
->       choose_path
+>       register_kill_listener
 >   ) where
 >
 > import Data.IntMap (IntMap)
@@ -19,7 +12,7 @@
 > import qualified Data.Array.IArray as IA
 > import Data.Function (on)
 >
-> import Control.Concurrency.MVar
+> import Control.Concurrent.MVar
 >
 > import Defs
 > import StupidClasses
@@ -36,7 +29,7 @@
 >       kill_listeners :: [IO ()]
 >   }
 >
-> data Creatures = {
+> data Creatures = Creatures {
 >       cid_map :: IntMap Creature,
 >       loc_map :: Grid (MVar CID),
 >       next_cid :: CID
@@ -57,9 +50,6 @@
 >       max_hp = max_health species,
 >       until_regen = 1
 >   }
->
-> creatures_list :: Creatures -> [Creature]
-> creatures_list cs = IM.elems (c_map cs)
 >
 > register_kill_listener :: IO () -> Creature -> Creature
 > register_kill_listener listener c = c{kill_listeners = listener:(kill_listeners c)}

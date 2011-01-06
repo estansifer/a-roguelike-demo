@@ -15,8 +15,11 @@
 > import Util.CursesWrapper
 > import Constants
 > import Defs
+> import State.Species
 > import State.State
+> import State.MState
 > import State.Creature
+> import Action.Creatures
 
 > type Canvas s = SA.STArray s Pos Char
 > type S s = ST s ()
@@ -33,7 +36,7 @@
 > repaint :: GS ()
 > repaint = do
 >   prev <- get_last_repaint
->   now <- getCPUTime
+>   now <- liftIO getCPUTime
 >   if now - prev > repaint_interval then repaint_force else return ()
 
 > repaint_force :: GS ()
@@ -50,7 +53,7 @@
 >   poss <- get_all_positions
 >   objects <- get_objects
 >   los <- get_line_of_sight
->   reatures <- get_living_creatures
+>   creatures <- get_living_creatures
 >   kaart <- get_kaart
 >
 >   liftIO $ print_array_corner $ SA.runSTArray $ do
