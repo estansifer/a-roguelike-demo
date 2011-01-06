@@ -1,4 +1,6 @@
 
+> {-# LANGUAGE BangPatterns #-}
+>
 > module Defs (
 >       I, Pos, Dir,
 >       Grid, MGrid,
@@ -15,6 +17,8 @@
 >
 >       pretty_print_level, pretty_print_char_grid
 >   ) where
+
+> import Debug.Trace
 
 > import qualified Data.Array
 > import qualified Data.Array.ST
@@ -43,10 +47,10 @@
 Utility functions for walls and floors.
 
 > is_floor, is_wall :: T -> Bool
-> is_floor Floor = True
-> is_floor Wall  = False
-> is_wall  Floor = False
-> is_wall  Wall  = True
+> is_floor !Floor = True
+> is_floor !Wall  = False
+> is_wall  !Floor = False
+> is_wall  !Wall  = True
 
 Grid height and width.
 
@@ -75,7 +79,7 @@ Grid height and width.
 > swap_x_y (a, b) = (b, a)
 
 > add_dir :: Pos -> Dir -> Pos
-> add_dir (a, b) (c, d) = (a + c, b + d)
+> add_dir (!a, !b) (!c, !d) = (a + c, b + d)
 
 > sub_pos :: Pos -> Pos -> Dir
 > sub_pos (a, b) (c, d) = (a - c, b - d)

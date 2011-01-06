@@ -29,10 +29,10 @@ The minimum length of time between repaints of the screen, in microseconds.
 > repaint_interval = 100000
 
 The kobold is the most common creature, with scarcity 100.
-One kobold should appear at the beginning of a level per 200 squares of level.
+One kobold should appear at the beginning of a level per 400 squares of level.
 
 > scarcity_per :: Num a => a
-> scarcity_per = 200 * 100
+> scarcity_per = 400 * 100
 
 Number of turns it would take for monster spawning to regenerate the
 entire level, on average.

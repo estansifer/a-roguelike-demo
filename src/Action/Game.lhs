@@ -5,9 +5,10 @@
 
 > import Control.Concurrent
 
-> import Util.Util (loop)
+> import Util.Util (repeat_until, db)
 > import Util.InputStream
 > import Util.Stream
+> import Util.Flag
 > import State.Species
 > import State.State
 > import State.MState
@@ -23,7 +24,8 @@
 > main_game = do
 >   initialize_game 
 >   input_stream <- liftIO input_stream_char
->   main_loop input_stream
+>   quit <- liftIO new_flag
+>   main_loop input_stream quit
 
 
 > initialize_game :: GS ()
@@ -31,14 +33,24 @@
 >   initialize_state
 >   create_character
 
-> main_loop :: Stream Char -> GS ()
-> main_loop input_stream = loop $ do
->   initialize_level
->   start_timed_events
->   fork_gs $ process_player_commands input_stream
->   lock unpause
->   block_until_paused
->   increment_depth
+> main_loop :: Stream Char -> Flag -> GS ()
+> main_loop input_stream quit = repeat_until
+>   (do
+>       db "a"
+>       initialize_level
+>       db "b"
+>       start_timed_events
+>       db "c"
+>       fork_gs $ process_player_commands input_stream quit
+>       db "d"
+>       lock unpause            -- blocks forever here sometimes
+>       db "e"
+>       block_until_paused     -- blocks forever here sometimes
+>       db "f"
+>       increment_depth
+>       db "g")
+>   (\_ -> db "h" >> (liftIO $ is_raised quit >>= \b -> (db "i" >> return b)))
+
 
 
 > start_timed_events :: GS ThreadId
@@ -50,11 +62,18 @@
 >       unless_paused maybe_spawn_timed_monsters
 
 
-> process_player_commands :: Stream Char -> GS ()
-> process_player_commands input_stream = do
+> process_player_commands :: Stream Char -> Flag -> GS ()
+> process_player_commands input_stream quit = do
 >   block_until_unpaused
 >   liftIO $ drop_pending_values input_stream
 >   repeat_until_paused $ do
->       lock repaint
+>       lock repaint_force
 >       liftIO $ block_until_ready input_stream
->       unless_paused (liftIO (next_command input_stream) >>= perform_command)
+>       unless_paused $ process_command input_stream quit
+
+> process_command :: Stream Char -> Flag -> GS ()
+> process_command input_stream quit = do
+>   command <- liftIO $ next_command input_stream
+>   case command of
+>       Quit -> liftIO (raise_flag quit) >> pause
+>       _ -> perform_command command

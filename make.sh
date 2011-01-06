@@ -14,6 +14,7 @@ bin_dir="bin"
 
 # ghc --make -O2 *.lhs -threaded -prof -auto-all -i$src_dir
 cc="ghc"
+#ccopts="--make -O2 -prof -auto-all -i$src_dir"
 ccopts="--make -O2 -threaded -i$src_dir"
 
 $cc $ccopts $src_dir/*.lhs $src_dir/*/*.lhs

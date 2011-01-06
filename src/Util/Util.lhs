@@ -3,8 +3,11 @@
 >       arrayize, arrayizeM,
 >       while,
 >       loop,
->       repeat_until, repeat_while
+>       repeat_until, repeat_while,
+>       db
 >   ) where
+
+> import Control.Monad.Trans
 
 > import Ix (Ix, range)
 > import Data.Array (Array, array)
@@ -47,3 +50,6 @@ Repeat the given action 'body' forever.
 >   a <- body
 >   b <- condition a
 >   if b then repeat_while body condition else return a
+
+> db :: MonadIO m => String -> m ()
+> db s = liftIO $ putStrLn s

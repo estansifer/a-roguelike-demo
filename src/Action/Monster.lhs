@@ -4,7 +4,9 @@
 >   ) where
 
 > import qualified Data.Array.IArray as IA
+> import qualified Data.IntMap as IM
 
+> import Util.Util (db)
 > import Defs
 > import Constants
 > import State.Creature
@@ -29,17 +31,22 @@ killed.
 
 > perform_monster_action :: CID -> GS ()
 > perform_monster_action cid = do
->   pos <- fmap location $ get_creature cid
->   p_pos <- get_player_location
->   let dir_to_player = p_pos `sub_pos` pos
->   valid_dirs <- get_valid_dirs
->   let can_attack = dir_to_player `elem` (valid_dirs IA.! pos)
+>   creatures <- get_creatures
+>   case IM.lookup cid (cid_map creatures) of
+>       Nothing -> return ()
+>       Just creature -> do
+>           let pos = location creature
+>           pos <- fmap location $ get_creature cid
+>           p_pos <- get_player_location
+>           let dir_to_player = p_pos `sub_pos` pos
+>           valid_dirs <- get_valid_dirs
+>           let can_attack = dir_to_player `elem` (valid_dirs IA.! pos)
 >
->   if can_attack then monster_attack cid else do
->       if norm dir_to_player <= smelling_range_squared
->           then move_towards_player cid
->           else return ()
->   age_creature cid
+>           if can_attack then monster_attack cid else do
+>               if norm dir_to_player <= smelling_range_squared
+>                   then move_towards_player cid pos
+>                   else return ()
+>           age_creature cid
 
-> move_towards_player :: CID -> GS ()
-> move_towards_player cid = choose_path cid >>= update_creature_location cid
+> move_towards_player :: CID -> Pos -> GS ()
+> move_towards_player cid pos = choose_path cid >>= update_creature_location cid . (add_dir pos)

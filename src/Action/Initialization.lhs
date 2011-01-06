@@ -29,10 +29,21 @@
 >   let bounds = ((1, 1), params)
 >   
 >   set_state $ State {
->           dims_ = params,
->           bounds_ = bounds,
->           all_positions_ = Ix.range bounds,
->           dungeon_depth_ = starting_depth
+>           dims_               = params,
+>           bounds_             = bounds,
+>           all_positions_      = Ix.range bounds,
+>           dungeon_depth_      = starting_depth,
+>
+>           terrain_            = undefined,
+>           valid_dirs_         = undefined,
+>           kaart_              = undefined,
+>           objects_            = undefined,
+>           creatures_          = undefined,
+>           player_             = undefined,
+>           player_location_    = undefined,
+>           line_of_sight_      = undefined,
+>           shortest_paths_     = undefined,
+>           paused_switch_      = undefined
 >       }
 >   new_creatures
 
@@ -91,4 +102,4 @@ none are placed in line-of-sight of the player.
 >       f_new_kaart pos = (old_kaart IA.! pos) || (new_los IA.! pos)
 >   set_kaart $ arrayize f_new_kaart bounds
 >   set_line_of_sight new_los
->   set_shortest_paths (compute_shortest_paths valid_dirs location)
+>   set_shortest_paths $! (compute_shortest_paths valid_dirs location)

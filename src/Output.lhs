@@ -1,7 +1,8 @@
 
 > module Output (
 >       repaint,
->       repaint_force
+>       repaint_force,
+>       hard_refresh
 >   ) where
 
 > import System.CPUTime
@@ -20,6 +21,7 @@
 > import State.MState
 > import State.Creature
 > import Action.Creatures
+> import Action.Player
 
 > type Canvas s = SA.STArray s Pos Char
 > type S s = ST s ()
@@ -46,6 +48,12 @@
 >   liftIO $ refresh
 >   set_last_repaint
 
+> hard_refresh :: GS ()
+> hard_refresh = do
+>   liftIO $ blank_screen '_'
+>   liftIO $ refresh
+>   repaint_force
+
 > paint_level :: GS ()
 > paint_level = do
 >   bounds <- get_bounds
@@ -55,6 +63,8 @@
 >   los <- get_line_of_sight
 >   creatures <- get_living_creatures
 >   kaart <- get_kaart
+>   loc <- get_player_location
+>   is_alive <- alive
 >
 >   liftIO $ print_array_corner $ SA.runSTArray $ do
 >       canvas <- MA.newArray bounds unseen_character
@@ -62,6 +72,9 @@
 >       paint_objects canvas objects poss
 >       paint_vis_monsters canvas los
 >       mapM_ (paint_creature canvas) creatures
+>       if not is_alive
+>           then paint_dead_character canvas loc
+>           else return ()
 >       paint_unseen canvas kaart poss
 >       return canvas
 
@@ -84,6 +97,9 @@ Unused.  The player is a particular species now.
 
 > paint_character :: Canvas s -> Pos -> S s
 > paint_character canvas pos = _paint canvas pos player_character
+
+> paint_dead_character :: Canvas s -> Pos -> S s
+> paint_dead_character canvas pos = _paint canvas pos dead_player_character
 
 > paint_creature :: Canvas s -> Creature -> S s
 > paint_creature canvas creature =
@@ -117,6 +133,9 @@ their Species record, which are defined in various files.)
 
 > player_character :: Char
 > player_character = '@'
+
+> dead_player_character :: Char
+> dead_player_character = '*'
 
 > tile_character :: T -> Char
 > tile_character Floor = '.'

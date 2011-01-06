@@ -27,7 +27,7 @@
 > import Control.Concurrent
 > import Control.Monad (forM)
 
-> import Util.Util (arrayizeM, repeat_until)
+> import Util.Util (arrayizeM, repeat_until, db)
 > import Util.RandomM
 > import Constants
 > import Defs
@@ -69,7 +69,9 @@
 > get_cids_by_movement :: MovementType -> GS [CID]
 > get_cids_by_movement mt = do
 >   creatures <- get_creatures
->   return $ map fst $ filter (elem mt . movement_type . species . snd) $
+>   return $ map fst $
+>       filter (elem mt . movement_type . species . snd) $
+>       filter (not . killed . snd) $
 >               IM.assocs $ cid_map creatures
 
 > is_empty_pos :: Pos -> GS Bool
@@ -119,7 +121,7 @@ We are using the fact that the player has no kill listeners registered on it.
 >   }
 
 > create_player :: GS CID
-> create_player = create_creature_at human (1, 1)
+> create_player = set_player_location (1, 1) >> create_creature_at human (1, 1)
 
 > create_creature_at :: Species -> Pos -> GS CID
 > create_creature_at sp pos = do
@@ -180,13 +182,15 @@ We are using the fact that the player has no kill listeners registered on it.
 
 > deal_damage :: CID -> Integer -> GS Bool
 > deal_damage cid amount = do
->   c <- get_creature cid
+>   creatures <- get_creatures
+>   let c = cid_map creatures IM.! cid
 >   if (killed c) then return False else do
 >       let c' = c {health = take_damage amount (health c)}
 >       if hp (health c') < 0
 >           then do
 >               liftIO $ sequence $ kill_listeners c'
 >               modify_creature cid (const (c'{killed = True}))
+>               liftIO $ tryTakeMVar $ loc_map creatures IA.! (location c)
 >               return True
 >           else do
 >               modify_creature cid (const c')

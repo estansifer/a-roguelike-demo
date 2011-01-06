@@ -13,8 +13,9 @@
 >   Drink |
 >   Read |
 >   Down |
+>   RefreshScreen |
 >   Quit
->       deriving Eq
+>       deriving (Eq, Show)
 
 > char_to_command :: Char -> Maybe PlayerCommand
 > char_to_command c = case c of
@@ -31,6 +32,8 @@
 >   'd' -> Just Drink
 >   'r' -> Just Read
 >   '>' -> Just Down
+>
+>   'R' -> Just RefreshScreen
 >
 >   'Q' -> Just Quit
 >

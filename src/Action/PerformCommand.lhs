@@ -5,7 +5,9 @@
 
 > import qualified Data.Array.IArray as IA
 
+> import Util.Util (db)
 > import Defs
+> import Output
 > import TerrainComputation
 > import PlayerCommand
 > import State.Species
@@ -24,7 +26,11 @@
 > perform_command :: PlayerCommand -> GS ()
 > perform_command pc = do
 >   legal <- is_legal_command pc
->   if legal then perform_legal_command pc else return ()
+>   if legal
+>       then perform_legal_command pc
+>       else case pc of
+>           RefreshScreen -> hard_refresh
+>           _ -> return ()
 
 > is_legal_command :: PlayerCommand -> GS Bool
 > is_legal_command pc = do
@@ -40,6 +46,7 @@
 >           Drink -> has_potion player
 >           Read -> has_scroll player
 >           Down -> Stairs `elem` (objects IA.! loc)
+>           RefreshScreen -> False
 >           Quit -> False)
 
 
@@ -49,11 +56,11 @@
 >       Move dir -> go_in_direction dir
 >       Drink -> drink
 >       Read -> scroll
->       Down -> pause
->       Quit -> error "Quit is not a legal action"
+>       Down -> return ()
 >   age_normal_monsters
 >   age_player
 >   maybe_spawn_normal_monsters
+>   if pc == Down then pause else return ()
 
 > go_in_direction :: Dir -> GS ()
 > go_in_direction dir =

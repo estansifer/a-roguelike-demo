@@ -25,14 +25,17 @@
 
 > age_player :: GS ()
 > age_player = do
->   get_player_cid >>= age_creature
->   modify_player $ \p -> p {hunger = hunger p - 1}
+>   cid <- get_player_cid
+>   age_creature cid
+>
+>   p <- get_player
+>   set_player $ p {hunger = hunger p - 1}
+>   if hunger p - 1 < 0
+>       then modify_creature cid $ \c -> c {killed = True}
+>       else return ()
 
 > alive :: GS Bool
-> alive = do
->   c <- get_player_cid >>= get_creature
->   player <- get_player
->   return (hp (health c) >= 0 && hunger player >= 0)
+> alive = (get_player_cid >>= get_creature) >>= return . not . killed
 
 > scroll :: GS ()
 > scroll = do

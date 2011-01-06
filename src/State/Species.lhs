@@ -33,7 +33,7 @@
 >       movement_type = [Human],
 >       species_texture = '@',
 >       xp_reward = 0,
->       max_damage = 5,
+>       max_damage = 6,
 >       max_health = 15,
 >       min_depth = 1,
 >       scarcity = 0
@@ -47,7 +47,7 @@
 >       xp_reward = 2,
 >       max_damage = 2,
 >       max_health = 6,
->       min_depth = 1,
+>       min_depth = 4,
 >       scarcity = 100
 >   }
 

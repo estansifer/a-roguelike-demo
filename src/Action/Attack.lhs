@@ -34,6 +34,5 @@
 > monster_attack :: CID -> GS ()
 > monster_attack cid = do
 >   pcid <- get_player_cid
->   killed <- attack cid pcid
->   -- TODO:  end game if player killed
+>   attack cid pcid
 >   return ()

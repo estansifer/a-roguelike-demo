@@ -8,6 +8,7 @@
 >       print_string,
 >       print_array_corner, print_array,
 >       refresh,
+>       blank_screen,
 >       get_char,
 >       get_key,
 >       get_any_key
@@ -16,6 +17,8 @@
 > import Control.Monad (forM_)
 > import Data.Array.IArray as IA
 > import qualified UI.HSCurses.Curses as C
+>
+> import Util.Util (arrayize)
 >
 > wrap_main :: IO () -> IO ()
 > wrap_main main' = do
@@ -97,6 +100,11 @@ Updates the display.
 
 > refresh :: IO ()
 > refresh = C.refresh
+
+> blank_screen :: Char -> IO ()
+> blank_screen c = do
+>   (x, y) <- get_screen_size
+>   print_array_corner (arrayize (const c) ((1, 1), (x, y)))
 
 Blocks until a printable char is received on input.  Any non-printable chars
 received on input are ignored.

@@ -12,7 +12,7 @@
 > import Data.List (intersect)
 > import Control.Monad (forM_)
 >
-> import Util.Util (repeat_until)
+> import Util.Util (repeat_until, db)
 > import Util.RandomM
 > import TerrainComputation
 > import Constants
@@ -61,6 +61,8 @@
 > start_movement mt clock_speed action = case mt of
 >   Timed -> regular_repeat_until_halted clock_speed action
 >   TimedWave -> sine_repeat_until_halted clock_speed wave_period wave_amp action
+
+
 
 > species_by_mt :: [MovementType] -> [Species]
 > species_by_mt mts = filter (not . null . intersect mts . movement_type) all_species

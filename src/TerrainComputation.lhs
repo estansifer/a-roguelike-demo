@@ -6,6 +6,9 @@
 >       random_open_location,
 >       random_open_location_m
 >   ) where
+
+> import Debug.Trace
+> import Constants
 >
 > import Prelude hiding (floor)
 >
@@ -52,16 +55,17 @@ the starting point or it is not accessible to the starting point.
 >       st_enqueue q_var (pos, (0, (0, 0)))
 >       while (fmap not $ is_st_empty q_var) $ do
 >           Just (cur, path@(dist, _)) <- st_dequeue q_var
+>           if norm (cur `sub_pos` pos) > smelling_range_squared then return () else do
 >
->           v <- MA.readArray visited cur
->           if v then return () else do
->               MA.writeArray visited cur True
->               MA.writeArray paths cur path
+>               v <- MA.readArray visited cur
+>               if v then return () else do
+>                   MA.writeArray visited cur True
+>                   MA.writeArray paths cur path
 >               
->               forM_ (dirs IA.! cur) $ \dir -> do
->                   v' <- MA.readArray visited cur
->                   if v' then return () else
->                       st_enqueue q_var (add_dir cur dir, (dist + 1, flip_dir dir))
+>                   forM_ (dirs IA.! cur) $ \dir -> do
+>                       v' <- MA.readArray visited (cur `add_dir` dir)
+>                       if v' then return () else
+>                           st_enqueue q_var (cur `add_dir` dir, (dist + 1, flip_dir dir))
 >       
 >       return paths
 
