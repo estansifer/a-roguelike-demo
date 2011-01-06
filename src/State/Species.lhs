@@ -47,7 +47,7 @@
 >       xp_reward = 2,
 >       max_damage = 2,
 >       max_health = 6,
->       min_depth = 4,
+>       min_depth = 1,
 >       scarcity = 100
 >   }
 
