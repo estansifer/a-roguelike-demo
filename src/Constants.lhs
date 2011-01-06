@@ -20,6 +20,10 @@
 > phase_door_range = 10
 
 
+The minimum length of time between repaints of the screen, in microseconds.
+
+> repaint_interval = 100000
+
 The kobold is the most common creature, with scarcity 100.
 One kobold should appear at the beginning of a level per 200 squares of level.
 

@@ -33,7 +33,7 @@
 >       health :: Health,
 >       location :: Pos,
 >       killed :: Bool,
->       kill_signals :: [Signal]
+>       kill_listeners :: [IO ()]
 >   }
 >
 > data Creatures = {
@@ -60,3 +60,6 @@
 >
 > creatures_list :: Creatures -> [Creature]
 > creatures_list cs = IM.elems (c_map cs)
+>
+> register_kill_listener :: IO () -> Creature -> Creature
+> register_kill_listener listener c = c{kill_listeners = listener:(kill_listeners c)}

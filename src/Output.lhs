@@ -1,8 +1,10 @@
 
 > module Output (
->       repaint
+>       repaint,
+>       repaint_force
 >   ) where
 
+> import System.CPUTime
 > import Control.Monad (forM_)
 > import qualified Data.Array.IArray as IA
 > import qualified Data.Array.MArray as MA
@@ -11,6 +13,7 @@
 > import Data.STRef
 >
 > import Util.CursesWrapper
+> import Constants
 > import Defs
 > import State.State
 > import State.Creature
@@ -29,27 +32,34 @@
 
 > repaint :: GS ()
 > repaint = do
+>   prev <- get_last_repaint
+>   now <- getCPUTime
+>   if now - prev > repaint_interval then repaint_force else return ()
+
+> repaint_force :: GS ()
+> repaint_force = do
 >   paint_level
 >   paint_status
 >   liftIO $ refresh
+>   set_last_repaint
 
 > paint_level :: GS ()
 > paint_level = do
->   bs <- bounds
->   t <- terrain
->   poss <- all_positions
->   objs <- objects
->   los <- line_of_sight
->   cs <- creatures
->   k <- kaart
+>   bounds <- get_bounds
+>   terrain <- get_terrain
+>   poss <- get_all_positions
+>   objects <- get_objects
+>   los <- get_line_of_sight
+>   reatures <- get_living_creatures
+>   kaart <- get_kaart
 >
 >   liftIO $ print_array_corner $ SA.runSTArray $ do
->       canvas <- MA.newArray bs unseen_character
->       paint_terrain canvas t poss
->       paint_objects canvas objs poss
+>       canvas <- MA.newArray bounds unseen_character
+>       paint_terrain canvas terrain poss
+>       paint_objects canvas objects poss
 >       paint_vis_monsters canvas los
->       mapM_ (paint_creature canvas) cs
->       paint_unseen canvas k poss
+>       mapM_ (paint_creature canvas) creatures
+>       paint_unseen canvas kaart poss
 >       return canvas
 
 > paint_terrain :: Canvas s -> Terrain -> [Pos] -> S s

@@ -1,8 +1,5 @@
 
 > module State.MState (
->       initialize_game,
->       descend_level,
->
 >       get_dims,
 >       get_bounds,
 >       get_all_positions,
@@ -22,14 +19,13 @@
 >       set_kaart,
 >       set_objects,
 >       set_creatures_data,
->       modify_creatures,
 >       set_player,
 >       set_location,
 >       set_line_of_sight,
 >       set_shortest_paths,
 >       set_paused_switch,
 >
->       modify_player,
+>       increment_depth,
 >
 >       status_line
 >   ) where
@@ -48,72 +44,6 @@
 
 
 
-
-** Constants **
-
-> _starting_depth = 1
-
-
-
-** Game initialization (impure) **
-
-Assumes the game is currently uninitialized.
-
-> initialize_game :: GS ()
-> initialize_game = do
->   Uninitialized <- get_phase
->   params <- parameters
->
->   set_state $ State {dims_ = params}
->
->   set_random_terrain   -- This assumes that dims_ is well-defined
->   t <- terrain
->
->   set_depth _starting_depth
->
->   let bs = IA.bounds t
->   modify_state (\s -> s {_bounds = bs, _all_positions = Ix.range bs})
->
->   let vd = compute_valid_dirs t
->   set_valid_dirs vd
->
->   set_random_location
->   loc <- location
->
->   let los = compute_los t loc
->   set_kaart los
->   set_line_of_sight los
->
->   set_player new_player
->
->   seed <- random
->   set_objects (create_objects t seed)
->   set_shortest_paths (compute_shortest_paths vd loc)
->   set_phase Ongoing
-
-> descend_level :: GS ()
-> descend_level = do
->   increment_depth
->
->   set_random_terrain
->   t <- terrain
->
->   let vd = compute_valid_dirs t
->   set_valid_dirs vd
->
->   set_random_location
->   loc <- location
->
->   let los = compute_los t loc
->   set_kaart los
->   set_line_of_sight los
->
->   seed <- random
->   set_objects (create_objects t seed)
->   set_shortest_paths (compute_shortest_paths vd loc)
-
-
-** Reading game state **
 
 > get_ :: (State -> a) -> GS a
 > get_ f = fmap f get_state
@@ -170,7 +100,9 @@ Assumes the game is currently uninitialized.
 
 
 
-** Setting game state, low level **
+
+
+
 
 > set_depth :: Int -> GS ()
 > set_depth n = modify_state (\s -> s {dungeon_depth_ = n})
@@ -191,9 +123,6 @@ Assumes the game is currently uninitialized.
 > set_creatures_data :: Creatures -> GS ()
 > set_creatures_data c = modify_state (\s -> s {creatures_ = c})
 
-> modify_creatures :: (Creatures -> Creatures) -> GS ()
-> modify_creatures f = creatures_data >>= set_creatures_data . f
-
 TODO -- there's more to it than just this
 
 > set_location :: Pos -> GS ()
@@ -208,10 +137,6 @@ TODO -- there's more to it than just this
 > set_paused_switch :: Flag -> GS ()
 > set_paused_switch p = modify_state (\s -> s {paused_switch_ = p})
 
-
-
-> modify_player :: (Player -> Player) -> GS ()
-> modify_player f = player >>= set_player . f
 
 > increment_depth :: GS ()
 > increment_depth = dungeon_depth >>= set_depth . (+1)
@@ -238,55 +163,3 @@ TODO -- there's more to it than just this
 >       "    ! " ++ show (num_potions (inventory p)) ++
 >       "    ? " ++ show (num_scrolls (inventory p)) ++
 >       "    ; " ++ show (hunger p)
-
-
-
-
-
-
-Because of laziness, the intervening levels are never computed out, the
-only computation that takes place for the intervening levels is computing
-the seeds for their random number generators.
-
- create_game_at_depth :: I -> I -> Int -> Int -> GameState
- create_game_at_depth w h s d =
-   if d <= _starting_depth
-       then create_game w h s
-       else descend_level $ create_game_at_depth w h s (d - 1)
-
-
- is_legal_command :: GameState -> PlayerCommand -> Bool
- is_legal_command gs pc = case pc of
-   Move dir -> dir `elem` (valid_dirs gs IA.! player_location gs)
-   Drink -> False
-   Read -> False
-   Down -> Stairs `elem` (objects gs IA.! player_location gs)
-   Quit -> False
-
- perform_command :: GameState -> PlayerCommand -> GameState
- perform_command gs pc = case pc of
-   Move dir -> player_moves gs dir
-   Drink -> error "Drinking potions is not implemented"
-   Read -> error "Reading scrolls is not implemented"
-   Down -> descend_level gs
-   Quit -> error "'Quit' is not a legal movement"
-
- player_moves :: GameState -> Dir -> GameState
- player_moves gs dir = move_player_to gs (player_location gs `add_dir` dir)
-
-Obsolete.
-
- move_player_to :: GameState -> Pos -> GameState
- move_player_to gs loc =
-   let los' = compute_los (terrain gs) loc
-       k' pos = (kaart gs IA.! pos) || (los' IA.! pos) in
-   gs {
-       kaart = arrayize k' (bounds gs),
-
-       player_location = loc,
-       line_of_sight = los',
-       shortest_paths = compute_shortest_paths (valid_dirs gs) loc
-   }
-
- can_move_in_direction :: GameState -> Dir -> Bool
- can_move_in_direction gs dir = dir `elem` (valid_dirs gs IA.! player_location gs)

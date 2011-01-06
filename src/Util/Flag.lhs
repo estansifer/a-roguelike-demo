@@ -101,20 +101,20 @@ Switch
 
 
 
-> haltable_repeat :: MonadIO m => (m () -> m b) -> m Int -> m a -> m (m ())
-> haltable_repeat fork delay_amount action = do
+> haltable_repeat :: MonadIO m => (m () -> m b) -> m () -> m a -> m (IO ())
+> haltable_repeat fork delay action = do
 >       halt_flag <- liftIO new_flag
 >       let body = do
->               delay_amount >>= liftIO . delayThread
+>               delay
 >               halt <- liftIO $ is_raised halt_flag
 >               if halt
 >                   then return ()
 >                   else action >> body
 >       fork body
->       return (liftIO $ raise_flag halt_flag)
+>       return (raise_flag halt_flag)
 
-> regular_delay :: Monad m => Int -> m Int
-> regular_delay = return
+> regular_delay :: Monad m => Int -> m ()
+> regular_delay delay_amount = threadDelay delay_amount
 
 > make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (m Int)
 > make_sine_delay avg_delay period amplitude = liftIO $ do
@@ -122,13 +122,13 @@ Switch
 >   return $ liftIO $ do
 >       cur_time <- getCPUTime
 >       let dt = (fromInteger (cur_time - start_time)) / 1000000.
->       return $ calc_sine_delay avg_delay period amplitude dt
+>       threadDelay $ calc_sine_delay avg_delay period amplitude dt
 
 > sine_delay_sync :: MonadIO m => Int -> Int -> Double -> m Int
 > sine_delay_sync avg_delay period amplitude = liftIO $ do
 >   cur_time <- getCPUTime
 >   let dt = (fromInteger cur_time) / 1000000.
->   return $ calc_sine_delay avg_delay period amplitude dt
+>   threadDelay $ calc_sine_delay avg_delay period amplitude dt
 
 > calc_sine_delay :: Int -> Int -> Double -> Double -> Int
 > calc_sine_delay avg_delay period amp dt =

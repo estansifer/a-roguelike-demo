@@ -1,6 +1,7 @@
 
 > module Action.Player (
 >       modify_player,
+>       get_player_cid,
 >       age_player, alive,
 >       scroll, drink
 >   ) where
@@ -10,6 +11,9 @@
 
 > modify_player :: (Player -> Player) -> GS ()
 > modify_player f = modify_state $ (\s -> s {player_ = f (player_ s)})
+
+> get_player_cid :: GS CID
+> get_player_cid = fmap player_cid get_player
 
 > age_player :: GS ()
 > age_player = do

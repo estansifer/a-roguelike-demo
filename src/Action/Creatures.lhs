@@ -4,12 +4,17 @@
 >       get_creature,
 >       get_cid_at,
 >       get_creatures_list,
+>       get_living_creatures,
 >       get_cids_by_movement,
 >       is_empty_pos,
 >       new_creatures, reset_creatures,
 >       create_player, create_creature_at,
 >       update_creature_location,
->       choose_path
+>       choose_path,
+>       phase_door,
+>       deal_damage,
+>       creature_drink,
+>       age_creature
 >   ) where
 
 > import qualified Data.Array.IArray as IA
@@ -37,15 +42,18 @@
 > get_cid_at pos = do
 >   creatures <- get_creatures
 >   let mvar = loc_map creatures IA.! pos
->   mcid <- tryTakeMVar mvar
->   case mcid of
->       Just cid -> putMVar mvar cid >> return mcid
->       Nothing -> return mcid
+>   m_cid <- tryTakeMVar mvar
+>   case m_cid of
+>       Just cid -> putMVar mvar cid >> return m_cid
+>       Nothing -> return m_cid
 
 > get_creatures_list :: GS [Creature]
 > get_creatures_list = do
 >   creatures <- get_creatures
 >   return (IM.elems (cid_map creatures))
+
+> get_living_creatures :: GS [Creature]
+> get_living_creatures = fmap (filter (not . killed)) get_creatures_list
 
 > get_cids_by_movement :: MovementType -> GS [CID]
 > get_cids_by_movement mt = do
@@ -74,6 +82,11 @@
 >   let cid = player_cid player
 >   old_creatures <- get_creatures
 >   loc <- get_player_location
+
+We are using the fact that the player has no kill listeners registered on it.
+
+>   listIO $ sequence
+>       [k | c <- IM.elems (cid_map old_creatures), k <- kill_listeners c]
 >
 >   bounds <- get_bounds
 >   l_map <- arrayizeM newEmptyMVar bounds
@@ -149,6 +162,20 @@
 >                           dy <- randomR (-phase_door_range, phase_door_range)
 >                           return (pos `add_dir` (dx, dy)))
 >   update_creature_location cid new_pos
+
+> deal_damage :: CID -> Int -> GS Bool
+> deal_damage cid amount = do
+>   c <- get_creature cid
+>   if (killed c) then return False else do
+>       let c' = c {health = take_damage amount (health c)}
+>       if hp (health c') < 0
+>           then do
+>               sequence $ kill_listeners c'
+>               modify_creature cid (const (c'{killed = True}))
+>               return True
+>           else do
+>               modify_creature cid (const c')
+>               return False
 
 > creature_drink :: CID -> GS ()
 > creature_drink cid = modify_creature cid drink_potion

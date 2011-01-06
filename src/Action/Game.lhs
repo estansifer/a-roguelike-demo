@@ -30,6 +30,7 @@
 >   fork_gs $ process_player_commands input_stream
 >   lock unpause
 >   block_until_paused
+>   descend_level
 
 
 > start_timed_events :: GS ()
@@ -46,5 +47,6 @@
 >   block_until_unpaused
 >   drop_pending_values input_stream
 >   repeat_until_paused $ do
+>       lock repaint
 >       block_until_ready input_stream
 >       unless_paused (next_command input_stream >>= perform_command)

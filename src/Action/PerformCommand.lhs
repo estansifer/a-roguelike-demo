@@ -39,14 +39,22 @@
 > perform_legal_command :: PlayerCommand -> GS ()
 > perform_legal_command pc = do
 >   case pc of
->       Move dir -> move dir
+>       Move dir -> go_in_direction dir
 >       Drink -> drink
 >       Read -> scroll
->       Down -> descend_level -- TODO
+>       Down -> pause
 >       Quit -> error "Quit is not a legal action"
 >   age_normal_monsters
 >   age_player
 >   maybe_spawn_normal_monsters
+
+> go_in_direction :: Dir -> GS ()
+> go_in_direction dir =
+>   if dir == (0, 0) then pick_up_objects else do
+>   m_cid <- get_cid_at (loc `add_dir` dir)
+>   case m_cid of
+>       Just cid -> player_attack cid
+>       Nothing -> move dir
 
 > move :: Dir -> GS ()
 > move dir = do

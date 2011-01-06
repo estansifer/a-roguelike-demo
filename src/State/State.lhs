@@ -8,10 +8,17 @@
 >       GS, liftIO, 
 >       run_game,
 >       get_phase, set_phase,
->       lock, fork_gs, act_on_signal
+>       get_state, set_state,
+>       get_last_repaint, set_last_repaint,
+>       lock, fork_gs,
+>       repeat_until_halted,
+>       regular_repeat_until_halted,
+>       sine_repeat_until_halted,
+>       sine_sync_repeat_until_halted
 >   ) where
 
 > import System.Random (randomIO, randomRIO)
+> import System.CPUTime
 >
 > -- from the transformers library
 > import qualified Control.Monad.Trans as CMT (liftIO)
@@ -83,6 +90,7 @@ be replaced with IO arrays for greater efficiency.
 >       parameters_         :: Parameters,
 >       phase_var_          :: MVar Phase,
 >       state_var_          :: MVar State,
+>       last_repaint_var_   :: IORef Integer,
 >       global_lock_        :: Lock
 >   }
 
@@ -128,6 +136,9 @@ name we use).  Thus we can perform IO actions in the GS monad.
 >
 > state_var :: GS (MVar State)
 > state_var = asks state_var_
+>
+> last_repaint_var :: GS (IORef Integer)
+> last_repaint_var = asks last_repaint_var_
 
 
 The 'run_game' function has to create the initial game state, so in particular
@@ -137,12 +148,14 @@ it requires the game parameters.  The initial game state is 'Uninitialized'.
 > run_game params exec_game = do
 >   phase_var   <- newMVar $ Uninitialized
 >   state_var   <- newEmptyMVar
+>   repaint_var <- newIORef 0
 >   l           <- make_lock
 >   let is = ImplicitState {
->           parameters_     = params,
->           phase_var_      = phase_var,
->           state_var_      = state_var,
->           global_lock_    = l
+>           parameters_         = params,
+>           phase_var_          = phase_var,
+>           state_var_          = state_var,
+>           last_repaint_var_   = repaint_var,
+>           global_lock_        = l
 >       }
 >   runReaderT exec_game is
 
@@ -178,6 +191,14 @@ This must be single-threaded.
 
 
 
+> get_last_repaint_ :: GS Integer
+> get_last_repaint_ = last_repaint_var >>= liftIO . readIORef
+
+> set_last_repaint :: GS ()
+> set_last_repaint = do
+>   last_repaint <- last_repaint_var
+>   liftIO (getCPUTime >>= writeIORef last_repaint)
+
 > lock :: GS a -> GS a
 > lock action = do
 >   l <- asks global_lock_
@@ -192,17 +213,17 @@ then fork it.
 >   implicit <- ask
 >   liftIO $ forkIO $ runReaderT action implicit
 
-> repeat_until_halted :: GS Int -> GS a -> GS (GS ())
+> repeat_until_halted :: GS () -> GS a -> GS (IO ())
 > repeat_until_halted = haltable_repeat fork_gs
 
-> regular_repeat_until_halted :: Int -> GS a -> GS (GS ())
+> regular_repeat_until_halted :: Int -> GS a -> GS (IO ())
 > regular_repeat_until_halted delay = repeat_until_halted (regular_delay delay)
 
-> sine_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (GS ())
+> sine_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (IO ())
 > sine_repeat_until_halted avg_delay period amplitude action = do
 >   rep <- make_sine_delay avg_delay period amplitude
 >   repeat_until_halted rep action
 
-> sine_sync_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (GS ())
+> sine_sync_repeat_until_halted :: Int -> Int -> Double -> GS a -> GS (IO ())
 > sine_sync_repeat_until_halted avg_delay period amplitude =
 >   repeat_until_halted (sine_delay_sync avg_delay period amplitude)

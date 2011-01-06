@@ -25,7 +25,9 @@
 >   cur_depth <- get_depth
 >   forM_ all_species $ \species ->
 >       if cur_depth <= min_depth species then return () else
->       replicate ((area * scarcity species) `div` scarcity_per) (spawn_monster species)
+>       sequence $ replicate
+>           ((area * scarcity species) `div` scarcity_per)
+>           (spawn_monster species)
 
 > spawn_monster :: Species -> GS ()
 > spawn_monster species = do
@@ -43,14 +45,13 @@
 > fork_creature_movement :: MovementType -> CID -> GS ()
 > fork_creature_movement mt cid = do
 >   clock_speed <- get_clock_speed
->   signal <- make_signal mt clock_speed
->   act_on_signal signal $ perform_monster_action cid
->   modify_creature cid $ register_kill_signal signal
+>   halt <- start_movement mt clock_speed (unless_paused $ perform_monster_action cid)
+>   modify_creature cid $ register_kill_listener halt
 
-> make_signal :: MovementType -> Int -> GS ()
-> make_signal Timed clock_speed = liftIO $ regular_signal clock_speed
-> make_signal TimedWave clock_speed =
->   liftIO $ sine_signal wave_period wave_amp clock_speed
+> start_movement :: MovementType -> Int -> GS () -> GS (IO ())
+> start_movement mt clock_speed action = case mt of
+>   Timed -> regular_repeat_until_halted clock_speed action
+>   TimedWave -> sine_repeat_until_halted clock_speed wave_period wave_amp action
 
 Called once per time tick
 

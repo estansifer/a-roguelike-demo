@@ -1,6 +1,7 @@
 
 > module State.Health (
->       Health(hp, max_hp)
+>       Health(hp, max_hp),
+>       take_damage
 >   ) where
 
 > import Constants
@@ -11,6 +12,9 @@
 >       max_hp :: Int,
 >       until_regen :: Int
 >   }
+
+> take_damage :: Int -> Health -> Health
+> take_damage amount h = h{hp = (hp h) - amount}
 
 > regen_time :: Int -> Int
 > regen_time max_hp = min max_regen_time (time_to_full_health `div` max_hp)
