@@ -12,10 +12,10 @@
 >
 >       regular_delay,
 >       make_sine_delay,
->       sine_delay_sync
+>       sine_delay_sync,
+>       calc_sine_delay
 >   ) where
 >
-> import System.CPUTime
 
 for MonadIO:
 
@@ -24,6 +24,8 @@ for MonadIO:
 > import Control.Concurrent.MVar
 >
 > import Util.Util (loop)
+> import Util.Time
+> import Util.RandomM
 
 
 Flag
@@ -105,17 +107,17 @@ Switch
 > regular_delay :: MonadIO m => Int -> m ()
 > regular_delay delay_amount = liftIO $ threadDelay delay_amount
 
-> make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (IO ())
+> make_sine_delay :: (MonadIO m, RandomM m) => Int -> Int -> Double -> m (IO ())
 > make_sine_delay avg_delay period amplitude = liftIO $ do
->   start_time <- getCPUTime
->   return $ do
->       cur_time <- getCPUTime
->       let dt = (fromInteger (cur_time - start_time)) / 1000000.0
+>   start_time <- random
+>   return $ seq start_time $ do
+>       cur_time <- get_time
+>       let dt = fromInteger (cur_time - start_time)
 >       liftIO $ threadDelay $ calc_sine_delay avg_delay period amplitude dt
 
 > sine_delay_sync :: MonadIO m => Int -> Int -> Double -> m ()
 > sine_delay_sync avg_delay period amplitude = liftIO $ do
->   cur_time <- getCPUTime
+>   cur_time <- get_time
 >   let dt = (fromInteger cur_time) / 1000000.0
 >   liftIO $ threadDelay $ calc_sine_delay avg_delay period amplitude dt
 

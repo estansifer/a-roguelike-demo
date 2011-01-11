@@ -12,7 +12,7 @@
 >
 > import Prelude hiding (floor)
 >
-> import Control.Monad (forM_)
+> import Control.Monad (forM_, when)
 > import Control.Monad.ST
 >
 > import qualified Data.Array
@@ -55,8 +55,8 @@ the starting point or it is not accessible to the starting point.
 >       st_enqueue q_var (pos, (0, (0, 0)))
 >       while (fmap not $ is_st_empty q_var) $ do
 >           Just (cur, path@(dist, _)) <- st_dequeue q_var
->           if norm (cur `sub_pos` pos) > smelling_range_squared then return () else do
->
+>           -- when (norm (cur `sub_pos` pos) <= smelling_range_squared) $ do
+>           when True $ do
 >               v <- MA.readArray visited cur
 >               if v then return () else do
 >                   MA.writeArray visited cur True

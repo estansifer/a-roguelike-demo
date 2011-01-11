@@ -23,6 +23,18 @@ Consider a room, one of whose interior dimensions is of size 'length'.  We
 randomly choose whether or not to subdivide that room along that dimension,
 and if so, at what point to place the dividing wall (0-indexed).
 
+                   if length >= 30 then 1    else
+                   if length >= 25 then 0.9  else
+                   if length >= 20 then 0.9  else
+                   if length >= 15 then 0.95 else
+                   if length >= 10 then 0.9  else
+                   if length == 9 then 0.75 else
+                   if length == 8 then 0.45 else
+                   if length == 7 then 0.4  else
+                   if length == 6 then 0.35 else
+                   if length == 5 then 0.1  else
+                   0.1 in
+
 > choose_div_point :: I -> STR s (Maybe I)
 > choose_div_point length =
 >   if length < 5
@@ -31,10 +43,10 @@ and if so, at what point to place the dividing wall (0-indexed).
 >           (branch (return $ Just 1) (return $ Just (length - 2)))
 >           (let p = 
 >                   if length >= 30 then 1    else
->                   if length >= 25 then 0.9  else
->                   if length >= 20 then 0.9  else
->                   if length >= 15 then 0.95 else
->                   if length >= 10 then 0.9  else
+>                   if length >= 25 then 0.6  else  -- 0.9
+>                   if length >= 20 then 0.6  else  -- 0.9
+>                   if length >= 15 then 0.65 else  -- 0.95
+>                   if length >= 10 then 0.6  else  -- 0.9
 >                   if length == 9 then 0.75 else
 >                   if length == 8 then 0.45 else
 >                   if length == 7 then 0.4  else

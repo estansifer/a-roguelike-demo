@@ -9,6 +9,7 @@
 
 > import Util.Util (db)
 > import Defs
+> import Output
 > import Constants
 > import State.Creature
 > import State.State
@@ -37,6 +38,7 @@ killed.
 >       Just creature -> unless (killed creature) $ do
 >           let pos = location creature
 >           p_pos <- get_player_location
+>           los <- get_line_of_sight
 >           let dir_to_player = p_pos `sub_pos` pos
 >
 >           valid_dirs <- get_valid_dirs
@@ -45,9 +47,11 @@ killed.
 >           if can_attack
 >               then monster_attack cid
 >               else when
->                       (norm dir_to_player <= smelling_range_squared)
+>                       (norm dir_to_player <= smelling_range_squared ||
+>                           los IA.! pos)
 >                       (move_towards_player cid pos)
 >           age_creature cid
+>           repaint
 
 > move_towards_player :: CID -> Pos -> U ()
 > move_towards_player cid pos = choose_path cid >>= move_creature cid . (add_dir pos)

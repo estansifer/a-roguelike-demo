@@ -4,11 +4,16 @@
 >       monster_attack
 >   ) where
 
+> import Control.Monad (when)
+
 > import Util.RandomM
 > import Defs
+> import StupidClasses
 > import State.Health
 > import State.Species
 > import State.Creature
+> import State.XP
+> import State.Player
 > import State.State
 > import Action.Creatures
 > import Action.Player
@@ -23,14 +28,19 @@
 
 > player_attack :: CID -> U ()
 > player_attack cid = do
+>   exp <- fmap (xp_reward . species) (get_creature cid)
 >   pcid <- get_player_cid
 >   killed <- attack pcid cid
->   -- TODO:  gain exp.
+>
+>   when killed $ do
+>       player <- get_player
+>       let (xp', levs) = gain_xp (xp player) exp
+>       modify_player $ \p -> p {xp = xp'}
+>       sequence_ $ replicate levs $ modify_creature pcid level_up
 >   return ()
 
 > monster_attack :: CID -> U ()
 > monster_attack cid = do
 >   pcid <- get_player_cid
 >   attack cid pcid
->   -- TODO:  player death
 >   return ()

@@ -15,7 +15,7 @@
 > food_density      = 0.0015
 > scroll_density    = 0.001
 > potion_density    = 0.0005
-> stairs_density    = 0.01 -- 0.0003
+> stairs_density    = 0.0003
 
 > next_p :: Double -> Double
 > next_p p = if p > 0.8 then p else sqrt p

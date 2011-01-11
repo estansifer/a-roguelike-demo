@@ -11,25 +11,21 @@
 > import Defs
 > import StupidClasses
 > import State.Creature
+> import State.XP
 > import State.Inventory
 
 > data Player = Player {
 >   inventory :: Inventory,
->   xp :: Integer,
->   xp_level :: Integer,
+>   xp :: XP,
 >   hunger :: Integer
 > }
 
 > new_player :: Player
 > new_player = Player {
 >       inventory = empty_inventory,
->       xp = starting_xp,
->       xp_level = starting_xp_level,
+>       xp = no_xp,
 >       hunger = starting_hunger
 >   }
-
-
-
 
 > eat :: Player -> Player
 > eat p = p {hunger = min max_hunger (hunger p + food_nourishment)}

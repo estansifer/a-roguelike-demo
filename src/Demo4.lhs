@@ -8,4 +8,4 @@
 > main :: IO ()
 > main = wrap_main $ do
 >   (x, y) <- get_screen_size
->   run_game (x, y) main_game
+>   run_game (x, y - 1) main_game

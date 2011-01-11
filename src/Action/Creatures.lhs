@@ -152,12 +152,10 @@
 >               dx <- randomR (-phase_door_range, phase_door_range)
 >               dy <- randomR (-phase_door_range, phase_door_range)
 >               return (pos `add_dir` (dx, dy)))
->           (\p -> do
+>           (\p ->
+>               if not $ Ix.inRange bounds p then return False else do
 >               e <- is_empty_pos p
->               return
->                   ((e || (p == pos)) &&
->                       Ix.inRange bounds p &&
->                       (terrain IA.! p) == Floor))
+>               return ((e || (p == pos)) && (terrain IA.! p) == Floor))
 >   move_creature cid new_pos
 
 > deal_damage :: CID -> Integer -> U Bool

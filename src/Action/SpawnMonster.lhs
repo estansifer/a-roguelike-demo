@@ -19,6 +19,7 @@
 > import TerrainComputation
 > import Constants
 > import Defs
+> import Output
 > import State.Species
 > import State.State
 > import State.Creature
@@ -46,41 +47,37 @@
 >               e <- is_empty_pos p
 >               return (e && (not (los IA.! p))))
 >   cid <- create_creature_at species pos
->   forM_ [Timed, TimedWave] $ \mt ->
->       when (mt `elem` (movement_type species)) (fork_creature_movement mt cid)
+>   forM_ (movement_type species) $ \mt ->
+>       when (timed mt) (fork_creature_movement mt cid)
 
 > fork_creature_movement :: MovementType -> CID -> U ()
 > fork_creature_movement mt cid = do
->   cs <- asks (clock_speed . constants)
->   delay <- movement_delay mt cs
+>   delay <- movement_delay mt
 >   halt <- lift $ repeat_with_delay
 >           delay
 >           (perform_monster_action_if_alive cid)
 >   modify_creature cid $ register_kill_listener halt
 
-> movement_delay :: MovementType -> Int -> U (L ())
-> movement_delay mt clock_speed = case mt of
->   Timed -> return (regular_delay clock_speed)
->   TimedWave -> fmap liftIO $ make_sine_delay clock_speed wave_period wave_amp
+> movement_delay :: MovementType -> U (L ())
+> movement_delay mt = case mt of
+>   Timed d -> return (regular_delay d)
+>   TimedWave d p a -> fmap liftIO $ make_sine_delay d p a
 
-
-> species_by_mt :: [MovementType] -> [Species]
-> species_by_mt mts = filter (not . null . intersect mts . movement_type) all_species
 
 Called once per time tick
 
 > clock_tick :: U ()
-> clock_tick = maybe_spawn_timed_monsters
+> clock_tick = maybe_spawn_timed_monsters >> repaint
 
 > maybe_spawn_timed_monsters :: U ()
 > maybe_spawn_timed_monsters = maybe_spawn_monsters_by_species $
->   species_by_mt [Timed, TimedWave]
+>   filter (any timed . movement_type) all_species
 
 Called once per human action tick
 
 > maybe_spawn_normal_monsters :: U ()
 > maybe_spawn_normal_monsters = maybe_spawn_monsters_by_species $
->   species_by_mt [WithHuman]
+>   filter (any (not . timed) . movement_type) all_species
 
 > maybe_spawn_monsters_by_species :: [Species] -> U ()
 > maybe_spawn_monsters_by_species ss = do

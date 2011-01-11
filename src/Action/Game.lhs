@@ -35,15 +35,14 @@ after the game has been paused
 
 > play_level :: Stream Char -> Player -> Creature -> Integer -> L ()
 > play_level input_stream p c d = do
->   db "a"
 >   lock $ create_level p c d
->   db "b"
 >   continue_level input_stream
 
 > continue_level :: Stream Char -> L ()
 > continue_level input_stream = do
 >   start_clock
 >   process_player_commands input_stream
+>   lock repaint
 >   lock unpause
 >   block_until_paused
 
@@ -73,7 +72,6 @@ Block until all threads are done.
 > process_player_commands input_stream = fork_thread $ do
 >   liftIO $ drop_pending_values input_stream
 >   repeat_until_paused $ do
->       lock repaint_force
 >       liftIO $ block_until_ready input_stream
 >       unless_paused $ process_command input_stream
 
@@ -84,3 +82,4 @@ Block until all threads are done.
 >       Quit -> (asks (quit_game . switching) >>= liftIO . raise_flag) >> pause
 >       RefreshScreen -> hard_refresh
 >       _ -> perform_command command
+>   repaint_force

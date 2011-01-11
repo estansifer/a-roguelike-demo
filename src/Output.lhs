@@ -5,8 +5,7 @@
 >       hard_refresh
 >   ) where
 
-> import System.CPUTime
-> import Control.Monad (forM_)
+> import Control.Monad (forM_, when)
 > import qualified Data.Array.IArray as IA
 > import qualified Data.Array.MArray as MA
 > import Control.Monad.ST
@@ -14,6 +13,7 @@
 > import Data.STRef
 >
 > import Util.CursesWrapper
+> import Util.Time
 > import Constants
 > import Defs
 > import State.Species
@@ -37,15 +37,15 @@
 > repaint :: U ()
 > repaint = do
 >   prev <- get_last_repaint_time
->   now <- liftIO getCPUTime
->   if now - prev > repaint_interval then repaint_force else return ()
+>   now <- liftIO get_time
+>   when (now - prev > repaint_interval) repaint_force
 
 > repaint_force :: U ()
 > repaint_force = do
 >   paint_level
 >   paint_status
 >   liftIO $ refresh
->   now <- liftIO getCPUTime
+>   now <- liftIO get_time
 >   set_last_repaint_time now
 
 > hard_refresh :: U ()
@@ -72,7 +72,7 @@ TODO only paint monsters we can see
 >       canvas <- MA.newArray bounds unseen_character
 >       paint_terrain canvas terrain poss
 >       paint_objects canvas objects poss
->       mapM_ (paint_creature canvas) creatures
+>       mapM_ (paint_creature_if_in_los canvas los) creatures
 >       if not is_alive
 >           then paint_dead_character canvas loc
 >           else return ()
@@ -99,9 +99,10 @@ Unused.  The player is a particular species now.
 > paint_dead_character :: Canvas s -> Pos -> S s
 > paint_dead_character canvas pos = _paint canvas pos dead_player_character
 
-> paint_creature :: Canvas s -> Creature -> S s
-> paint_creature canvas creature =
->   _paint canvas (location creature) (species_texture $ species creature)
+> paint_creature_if_in_los :: Canvas s -> LOS -> Creature -> S s
+> paint_creature_if_in_los canvas los creature =
+>   when (los IA.! (location creature))
+>       (_paint canvas (location creature) (species_texture $ species creature))
 
 > paint_unseen :: Canvas s -> Kaart -> [Pos] -> S s
 > paint_unseen canvas kaart poss =

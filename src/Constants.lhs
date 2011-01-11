@@ -5,7 +5,11 @@
 
 > max_hunger = 9999
 > starting_hunger = max_hunger `div` 2
+
+> starting_xp :: Int
 > starting_xp = 0
+
+> starting_xp_level :: Int
 > starting_xp_level = 1
 
 > food_nourishment = 250
@@ -26,13 +30,13 @@
 
 The minimum length of time between repaints of the screen, in microseconds.
 
-> repaint_interval = 100000
+> repaint_interval = 10 * 1000
 
 The kobold is the most common creature, with scarcity 100.
-One kobold should appear at the beginning of a level per 400 squares of level.
+One kobold should appear at the beginning of a level per 800 squares of level.
 
 > scarcity_per :: Num a => a
-> scarcity_per = 400 * 100
+> scarcity_per = 800 * 100
 
 Number of turns it would take for monster spawning to regenerate the
 entire level, on average.

@@ -61,11 +61,8 @@ none are placed in line-of-sight of the player.
 > create_creatures :: Creature -> U ()
 > create_creatures pc = do
 >   bounds <- asks (bounds . constants)
->   db "b"
 >   terrain <- get_terrain
->   seq terrain $ db "c"
 >   loc <- random_open_location_m terrain
->   db "d"
 >
 >   let pcid = 1
 >

@@ -52,7 +52,6 @@
 >       status_line
 >   ) where
 
-> import System.CPUTime
 > import Control.Concurrent
 > import Data.IORef
 > import qualified Data.Ix as Ix
@@ -68,6 +67,7 @@
 > import Util.RandomM
 > import Util.Lock
 > import Util.Flag
+> import State.XP
 > import State.Player
 > import State.Creature
 > import State.Health
@@ -325,10 +325,11 @@
 >       let p = player_ l
 >           c = creatures_ l
 >           h = health (cid_map c IM.! player_cid c)
+>           x = xp p
 >       in
 >       "    > " ++ show (depth_ l) ++
 >       "    @ " ++ show (hp h) ++ "/" ++ show (max_hp h) ++
->       "    | " ++ show (xp_level p) ++ ":" ++ show (xp p) ++
+>       "    | " ++ show (xp_points x) ++ ":" ++ show (xp_level x) ++
 >       "    ! " ++ show (num_potions (inventory p)) ++
 >       "    ? " ++ show (num_scrolls (inventory p)) ++
 >       "    ; " ++ show (hunger p)
