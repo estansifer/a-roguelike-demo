@@ -10,7 +10,6 @@
 >       block_until_on, block_until_off,
 >       is_switch_on, is_switch_off,
 >
->       haltable_repeat,
 >       regular_delay,
 >       make_sine_delay,
 >       sine_delay_sync
@@ -91,37 +90,25 @@ Switch
 > is_switch_on switch = do
 >   m_on <- tryTakeMVar (on_flag switch)
 >   case m_on of
->       Just _ -> return True
+>       Just _ -> putMVar (on_flag switch) () >> return True
 >       Nothing -> return False
 
 > is_switch_off :: Switch -> IO Bool
 > is_switch_off switch = do
 >   m_off <- tryTakeMVar (off_flag switch)
 >   case m_off of
->       Just _ -> return True
+>       Just _ -> putMVar (off_flag switch) () >> return True
 >       Nothing -> return False
 
 
 
-> haltable_repeat :: MonadIO m => (m () -> m b) -> m () -> m a -> m (IO ())
-> haltable_repeat fork delay action = do
->       halt_flag <- liftIO new_flag
->       let body = do
->               delay
->               halt <- liftIO $ is_raised halt_flag
->               if halt
->                   then return ()
->                   else action >> body
->       fork body
->       return (raise_flag halt_flag)
-
 > regular_delay :: MonadIO m => Int -> m ()
 > regular_delay delay_amount = liftIO $ threadDelay delay_amount
 
-> make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (m ())
+> make_sine_delay :: MonadIO m => Int -> Int -> Double -> m (IO ())
 > make_sine_delay avg_delay period amplitude = liftIO $ do
 >   start_time <- getCPUTime
->   return $ liftIO $ do
+>   return $ do
 >       cur_time <- getCPUTime
 >       let dt = (fromInteger (cur_time - start_time)) / 1000000.0
 >       liftIO $ threadDelay $ calc_sine_delay avg_delay period amplitude dt

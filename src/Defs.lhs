@@ -3,7 +3,7 @@
 >
 > module Defs (
 >       I, Pos, Dir,
->       Grid, MGrid,
+>       Grid, STGrid, IOGrid,
 >       T(..), Object(..),
 >       Terrain, Pathing, Objects, ValidDirs, LOS, Kaart,
 >
@@ -22,6 +22,7 @@
 
 > import qualified Data.Array
 > import qualified Data.Array.ST
+> import qualified Data.Array.IO
 
 
 'I' is the index type by which positions in the level are represented.
@@ -31,7 +32,8 @@
 > type Dir = (I, I)
 
 > type Grid a = Data.Array.Array Pos a
-> type MGrid s a = Data.Array.ST.STArray s Pos a
+> type STGrid s a = Data.Array.ST.STArray s Pos a
+> type IOGrid a = Data.Array.IO.IOArray Pos a
 
 > data T = Floor | Wall deriving Eq
 

@@ -20,7 +20,7 @@
 From package transformers:
 
 > import Control.Monad.Trans
-> import Control.Monad.Trans.Reader
+> import Control.Monad.Reader
 
 
 A class representing monads from which random numbers can be extracted.

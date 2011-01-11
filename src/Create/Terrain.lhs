@@ -95,7 +95,7 @@ The outer border of the level is guaranteed to be all walls.
 > m_maybe Nothing _ = return ()
 > m_maybe (Just x) k = k x
 
-> place_room :: MGrid s T -> Pos -> I -> I -> STR s ()
+> place_room :: STGrid s T -> Pos -> I -> I -> STR s ()
 > place_room l (x, y) dx dy =
 >   if dx < 2 || dy < 2 then return () else
 >   let p = case dx `compare` dy of
@@ -118,7 +118,7 @@ The outer border of the level is guaranteed to be all walls.
 >               place_room l (x, y) dx div_y
 >               place_room l (x, y + div_y + 1) dx (dy - div_y - 1))
 
-> place_x_doors :: MGrid s T -> Pos -> I -> STR s ()
+> place_x_doors :: STGrid s T -> Pos -> I -> STR s ()
 > place_x_doors l (x, y) dy = do
 >   (door_loc, door_size) <- choose_door_placement dy
 >   paint_x l Floor x (y + door_loc, y + door_loc + door_size - 1)
@@ -126,7 +126,7 @@ The outer border of the level is guaranteed to be all walls.
 >       (place_x_doors l (x, y) dy)
 >       (return ())
 
-> place_y_doors :: MGrid s T -> Pos -> I -> STR s ()
+> place_y_doors :: STGrid s T -> Pos -> I -> STR s ()
 > place_y_doors l (x, y) dx = do
 >   (door_loc, door_size) <- choose_door_placement dx
 >   paint_y l Floor y (x + door_loc, x + door_loc + door_size - 1)
@@ -134,35 +134,35 @@ The outer border of the level is guaranteed to be all walls.
 >       (place_y_doors l (x, y) dx)
 >       (return ())
 
-> paint :: MGrid s T -> T -> (I, I) -> (I, I) -> STR s ()
+> paint :: STGrid s T -> T -> (I, I) -> (I, I) -> STR s ()
 > paint l t (a, b) (c, d) =
 >   if c < a || d < b then return () else do
 >   forM_ [a..c] $ \x ->
 >       forM_ [b..d] $ \y ->
 >           lift $ writeArray l (x, y) t
 
-> paint_x :: MGrid s T -> T -> I -> (I, I) -> STR s ()
+> paint_x :: STGrid s T -> T -> I -> (I, I) -> STR s ()
 > paint_x l t x (y1, y2) =
 >   if (y2 < y1) then return () else do
 >   forM_ [y1..y2] $ \y ->
 >       lift $ writeArray l (x, y) t
 
-> paint_y :: MGrid s T -> T -> I -> (I, I) -> STR s ()
+> paint_y :: STGrid s T -> T -> I -> (I, I) -> STR s ()
 > paint_y l t y (x1, x2) =
 >   if (x2 < x1) then return () else do
 >   forM_ [x1..x2] $ \x ->
 >       lift $ writeArray l (x, y) t
 
-> set :: MGrid s T -> Pos -> T -> STR s ()
+> set :: STGrid s T -> Pos -> T -> STR s ()
 > set grid pos val = lift $ writeArray grid pos val
 
-> place_holes :: MGrid s T -> I -> I -> STR s ()
+> place_holes :: STGrid s T -> I -> I -> STR s ()
 > place_holes l w h =
 >   forM_ [2 .. (w - 1)] $ \x ->
 >       forM_ [2..(h - 1)] $ \y -> do
 >           wbranch hole_density (set l (x, y) Floor) (return ())
 
-> place_pillars :: MGrid s T -> I -> I -> STR s ()
+> place_pillars :: STGrid s T -> I -> I -> STR s ()
 > place_pillars l w h =
 >   forM_ [2..(w - 1)] $ \x ->
 >       forM_ [2..(h - 1)] $ \y -> do
@@ -170,6 +170,6 @@ The outer border of the level is guaranteed to be all walls.
 >           o <- opening l x y
 >           if make_pillar && o then set l (x, y) Wall else return ()
 
-> opening :: MGrid s T -> I -> I -> STR s Bool
+> opening :: STGrid s T -> I -> I -> STR s Bool
 > opening l x y = fmap (all is_floor) $
 >   forM [(a, b) | a <- [x-1..x+1], b <- [y-1..y+1]] $ lift . readArray l

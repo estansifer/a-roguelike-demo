@@ -2,6 +2,7 @@
 in version 7 : {-# LANGUAGE ExplicitForAll #-}
 
 > {-# LANGUAGE RankNTypes #-}
+> {-# LANGUAGE ImpredicativeTypes #-}
 >
 > module Util.Lock (
 >       Lock,

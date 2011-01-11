@@ -3,77 +3,84 @@
 >       main_game
 >   ) where
 
+> import Control.Monad (unless)
 > import Control.Concurrent
 
 > import Util.Util (repeat_until, db)
 > import Util.InputStream
 > import Util.Stream
 > import Util.Flag
+> import Constants
 > import State.Species
+> import State.Creature
+> import State.Player
 > import State.State
-> import State.MState
-> import Action.Pause
+> import Action.Thread
 > import Action.Initialization
 > import Action.PerformCommand
 > import Action.SpawnMonster
+> import Action.Creatures
 > import Output
 > import PlayerCommand
 
 
-> main_game :: GS ()
+> main_game :: L ()
 > main_game = do
->   initialize_game 
 >   input_stream <- liftIO input_stream_char
->   quit <- liftIO new_flag
->   main_loop input_stream quit
+>   play_level input_stream new_player new_player_creature starting_depth
 
 
-> initialize_game :: GS ()
-> initialize_game = do
->   initialize_state
->   create_character
+TODO:  guarantee that new active threads cannot be registered
+after the game has been paused
 
-> main_loop :: Stream Char -> Flag -> GS ()
-> main_loop input_stream quit = repeat_until
->   (do
->       db "a"
->       initialize_level
->       db "b"
->       start_timed_events
->       db "c"
->       fork_gs $ process_player_commands input_stream quit
->       db "d"
->       lock unpause            -- blocks forever here sometimes
->       db "e"
->       block_until_paused     -- blocks forever here sometimes
->       db "f"
->       increment_depth
->       db "g")
->   (\_ -> db "h" >> (liftIO $ is_raised quit >>= \b -> (db "i" >> return b)))
+> play_level :: Stream Char -> Player -> Creature -> Integer -> L ()
+> play_level input_stream p c d = do
+>   db "a"
+>   lock $ create_level p c d
+>   db "b"
+>   continue_level input_stream
+
+> continue_level :: Stream Char -> L ()
+> continue_level input_stream = do
+>   start_clock
+>   process_player_commands input_stream
+>   lock unpause
+>   block_until_paused
+
+Block until all threads are done.
+
+>   ats <- lock get_active_threads
+>   liftIO $ mapM_ block_on_flag ats
+
+>   q <- asks (quit_game . switching) >>= liftIO . is_raised
+>   unless q $ do
+>       p <- lock (get_player)
+>       c <- lock (get_player_creature)
+>       d <- lock (get_depth)
+>       play_level input_stream p c (d + 1)
 
 
-
-> start_timed_events :: GS ThreadId
-> start_timed_events = fork_gs $ do
->   clock_speed <- get_clock_speed
->   block_until_unpaused
+> start_clock :: L ()
+> start_clock = fork_thread $ do
+>   clock_speed <- asks (clock_speed . constants)
 >   repeat_until_paused $ do
+>       lock repaint
 >       liftIO $ threadDelay clock_speed
->       unless_paused maybe_spawn_timed_monsters
+>       unless_paused clock_tick
 
 
-> process_player_commands :: Stream Char -> Flag -> GS ()
-> process_player_commands input_stream quit = do
->   block_until_unpaused
+> process_player_commands :: Stream Char -> L ()
+> process_player_commands input_stream = fork_thread $ do
 >   liftIO $ drop_pending_values input_stream
 >   repeat_until_paused $ do
 >       lock repaint_force
 >       liftIO $ block_until_ready input_stream
->       unless_paused $ process_command input_stream quit
+>       unless_paused $ process_command input_stream
 
-> process_command :: Stream Char -> Flag -> GS ()
-> process_command input_stream quit = do
+> process_command :: Stream Char -> U ()
+> process_command input_stream = do
 >   command <- liftIO $ next_command input_stream
 >   case command of
->       Quit -> liftIO (raise_flag quit) >> pause
+>       Quit -> (asks (quit_game . switching) >>= liftIO . raise_flag) >> pause
+>       RefreshScreen -> hard_refresh
 >       _ -> perform_command command

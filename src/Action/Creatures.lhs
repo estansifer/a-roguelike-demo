@@ -1,16 +1,22 @@
 
 > module Action.Creatures (
 >       unique_cid,
+>
+>       get_player_cid,
+>       get_player_creature,
+>       get_player_location,
+>       modify_player_creature,
+>
 >       get_creature,
 >       get_cid_at,
 >       get_creatures_list,
 >       get_living_creatures,
 >       get_cids_by_movement,
+>
 >       is_empty_pos,
->       new_creatures, reset_creatures,
 >       modify_creature,
->       create_player, create_creature_at,
->       update_creature_location,
+>       create_creature_at,
+>       move_creature,
 >       choose_path,
 >       phase_door,
 >       deal_damage,
@@ -19,6 +25,7 @@
 >   ) where
 
 > import qualified Data.Array.IArray as IA
+> import Data.Array.MArray (readArray, writeArray)
 > import qualified Data.IntMap as IM
 > import qualified Data.Ix as Ix
 
@@ -37,36 +44,51 @@
 > import State.Creature
 > import State.Player
 > import State.State
-> import State.MState
 
-> unique_cid :: GS CID
+> unique_cid :: U CID
 > unique_cid = do
 >   creatures <- get_creatures
 >   let cid = next_cid creatures
 >   set_creatures (creatures {next_cid = (cid + 1)})
 >   return cid
 
-> get_creature :: CID -> GS Creature
-> get_creature cid = fmap (\creatures -> cid_map creatures IM.! cid) get_creatures
 
-> get_cid_at :: Pos -> GS (Maybe CID)
+> get_player_cid :: U CID
+> get_player_cid = fmap player_cid get_creatures
+
+> get_player_creature :: U Creature
+> get_player_creature = get_player_cid >>= get_creature
+
+> get_player_location :: U Pos
+> get_player_location = fmap location get_player_creature
+
+> modify_player_creature :: (Creature -> Creature) -> U ()
+> modify_player_creature f =
+>   modify_creatures $ \creatures -> creatures {
+>       cid_map = IM.adjust f (player_cid creatures) (cid_map creatures)
+>   }
+
+
+
+> get_creature :: CID -> U Creature
+> get_creature cid = do
+>   creatures <- get_creatures
+>   return (cid_map creatures IM.! cid)
+
+> get_cid_at :: Pos -> U (Maybe CID)
 > get_cid_at pos = do
 >   creatures <- get_creatures
->   let mvar = loc_map creatures IA.! pos
->   m_cid <- liftIO $ tryTakeMVar mvar
->   case m_cid of
->       Just cid -> liftIO $ putMVar mvar cid >> return m_cid
->       Nothing -> return m_cid
+>   liftIO $ readArray (loc_map creatures) pos
 
-> get_creatures_list :: GS [Creature]
+> get_creatures_list :: U [Creature]
 > get_creatures_list = do
 >   creatures <- get_creatures
->   return (IM.elems (cid_map creatures))
+>   return $ IM.elems $ cid_map creatures
 
-> get_living_creatures :: GS [Creature]
+> get_living_creatures :: U [Creature]
 > get_living_creatures = fmap (filter (not . killed)) get_creatures_list
 
-> get_cids_by_movement :: MovementType -> GS [CID]
+> get_cids_by_movement :: MovementType -> U [CID]
 > get_cids_by_movement mt = do
 >   creatures <- get_creatures
 >   return $ map fst $
@@ -74,82 +96,39 @@
 >       filter (not . killed . snd) $
 >               IM.assocs $ cid_map creatures
 
-> is_empty_pos :: Pos -> GS Bool
+
+
+> is_empty_pos :: Pos -> U Bool
 > is_empty_pos pos = do
 >   creatures <- get_creatures
->   liftIO $ isEmptyMVar (loc_map creatures IA.! pos)
+>   mcid <- liftIO $ readArray (loc_map creatures) pos
+>   return $ case mcid of {Nothing -> True; _ -> False}
 
-> new_creatures :: GS ()
-> new_creatures = do
->   bounds <- get_bounds
->   l_map <- liftIO $ arrayizeM (const newEmptyMVar) bounds
->   set_creatures $ Creatures {
->           cid_map = IM.empty,
->           loc_map = l_map,
->           next_cid = 1
->       }
-
-> reset_creatures :: GS ()
-> reset_creatures = do
->   player <- get_player
->   let cid = player_cid player
->   old_creatures <- get_creatures
->   loc <- get_player_location
-
-We are using the fact that the player has no kill listeners registered on it.
-
->   liftIO $ sequence
->       [k | c <- IM.elems (cid_map old_creatures), k <- kill_listeners c]
->
->   bounds <- get_bounds
->   l_map <- liftIO $ arrayizeM (const newEmptyMVar) bounds
->   liftIO $ putMVar (l_map IA.! loc) cid
->   set_creatures $ Creatures {
->           cid_map = IM.singleton cid (cid_map old_creatures IM.! cid),
->           loc_map = l_map,
->           next_cid = cid + 1
->       }
-
-> modify_creatures :: (Creatures -> Creatures) -> GS ()
-> modify_creatures f = modify_state $ \s -> s {
->       creatures_ = f $ creatures_ s
->   }
-
-> modify_creature :: CID -> (Creature -> Creature) -> GS ()
+> modify_creature :: CID -> (Creature -> Creature) -> U ()
 > modify_creature cid f = modify_creatures $ \creatures -> creatures {
 >       cid_map = IM.adjust f cid (cid_map creatures)
 >   }
 
-> create_player :: GS CID
-> create_player = set_player_location (1, 1) >> create_creature_at human (1, 1)
-
-> create_creature_at :: Species -> Pos -> GS CID
+> create_creature_at :: Species -> Pos -> U CID
 > create_creature_at sp pos = do
->   cid <- unique_cid
+>   cid <- unique_cid   -- This must come before the 'get_creatures'
 >   creatures <- get_creatures
 >   set_creatures $ creatures {cid_map = 
->           IM.insert cid (Creature {
->               species = sp,
->               health = full_health sp,
->               location = pos,
->               killed = False,
->               kill_listeners = []
->           }) (cid_map creatures)
+>           IM.insert cid (new_creature sp pos) (cid_map creatures)
 >       }
->   liftIO $ putMVar (loc_map creatures IA.! pos) cid
+>   liftIO $ writeArray (loc_map creatures) pos $ Just cid
 >   return cid
 
-> update_creature_location :: CID -> Pos -> GS ()
-> update_creature_location cid p_new = do
+> move_creature :: CID -> Pos -> U ()
+> move_creature cid p_new = do
 >   creatures <- get_creatures
 >   let p_old = location (cid_map creatures IM.! cid)
->   let var_old = loc_map creatures IA.! p_old
->   let var_new = loc_map creatures IA.! p_new
->   liftIO $ tryTakeMVar var_old
->   liftIO $ tryPutMVar var_new cid
+>   liftIO $ writeArray (loc_map creatures) p_old Nothing
+>   liftIO $ writeArray (loc_map creatures) p_new (Just cid)
+>
 >   modify_creature cid (\c -> c {location = p_new})
 
-> choose_path :: CID -> GS Dir
+> choose_path :: CID -> U Dir
 > choose_path cid = do
 >   pathing <- get_shortest_paths
 >   valid_dirs <- get_valid_dirs
@@ -160,14 +139,12 @@ We are using the fact that the player has no kill listeners registered on it.
 >   emptys <- forM dirs $ \dir ->
 >       fmap (|| (dir == (0, 0))) (is_empty_pos (pos `add_dir` dir))
 >   let dirs' = map fst $ filter snd $ zip dirs emptys
->   case dirs' of
->       (dir:_) -> return dir
->       [] -> return (0, 0)     -- should never happen, as (0, 0) is a valid dir
+>   return $ head $ dirs'
 
-> phase_door :: CID -> GS ()
+> phase_door :: CID -> U ()
 > phase_door cid = do
 >   creatures <- get_creatures
->   bounds <- get_bounds
+>   bounds <- asks (bounds . constants)
 >   terrain <- get_terrain
 >   let pos = location (cid_map creatures IM.! cid)
 >   new_pos <- repeat_until
@@ -177,10 +154,13 @@ We are using the fact that the player has no kill listeners registered on it.
 >               return (pos `add_dir` (dx, dy)))
 >           (\p -> do
 >               e <- is_empty_pos p
->               return (e && Ix.inRange bounds p && (terrain IA.! p) == Floor))
->   update_creature_location cid new_pos
+>               return
+>                   ((e || (p == pos)) &&
+>                       Ix.inRange bounds p &&
+>                       (terrain IA.! p) == Floor))
+>   move_creature cid new_pos
 
-> deal_damage :: CID -> Integer -> GS Bool
+> deal_damage :: CID -> Integer -> U Bool
 > deal_damage cid amount = do
 >   creatures <- get_creatures
 >   let c = cid_map creatures IM.! cid
@@ -189,15 +169,15 @@ We are using the fact that the player has no kill listeners registered on it.
 >       if hp (health c') < 0
 >           then do
 >               liftIO $ sequence $ kill_listeners c'
->               modify_creature cid (const (c'{killed = True}))
->               liftIO $ tryTakeMVar $ loc_map creatures IA.! (location c)
+>               modify_creature cid (const (c'{killed = True, kill_listeners = []}))
+>               liftIO $ writeArray (loc_map creatures) (location c) Nothing
 >               return True
 >           else do
 >               modify_creature cid (const c')
 >               return False
 
-> creature_drink :: CID -> GS ()
+> creature_drink :: CID -> U ()
 > creature_drink cid = modify_creature cid drink_potion
 
-> age_creature :: CID -> GS ()
+> age_creature :: CID -> U ()
 > age_creature cid = modify_creature cid step

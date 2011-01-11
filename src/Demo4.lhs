@@ -1,5 +1,5 @@
 
-> module Demo3 where
+> module Demo4 where
 
 > import Util.CursesWrapper
 > import State.State

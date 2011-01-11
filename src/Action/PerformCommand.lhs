@@ -3,6 +3,7 @@
 >       perform_command
 >   ) where
 
+> import Control.Monad (when)
 > import qualified Data.Array.IArray as IA
 
 > import Util.Util (db)
@@ -13,26 +14,21 @@
 > import State.Species
 > import State.Player
 > import State.State
-> import State.MState
 > import Action.Creatures
 > import Action.Player
 > import Action.Initialization
 > import Action.SpawnMonster
-> import Action.Pause
+> import Action.Thread
 > import Action.Attack
 > import Action.Monster
 
 
-> perform_command :: PlayerCommand -> GS ()
+> perform_command :: PlayerCommand -> U ()
 > perform_command pc = do
 >   legal <- is_legal_command pc
->   if legal
->       then perform_legal_command pc
->       else case pc of
->           RefreshScreen -> hard_refresh
->           _ -> return ()
+>   when legal (perform_legal_command pc >> player_tick)
 
-> is_legal_command :: PlayerCommand -> GS Bool
+> is_legal_command :: PlayerCommand -> U Bool
 > is_legal_command pc = do
 >   a <- alive
 >   if not a then return False else do
@@ -50,19 +46,16 @@
 >           Quit -> False)
 
 
-> perform_legal_command :: PlayerCommand -> GS ()
+> perform_legal_command :: PlayerCommand -> U ()
 > perform_legal_command pc = do
 >   case pc of
 >       Move dir -> go_in_direction dir
 >       Drink -> drink
 >       Read -> scroll
->       Down -> return ()
->   age_normal_monsters
+>       Down -> pause
 >   age_player
->   maybe_spawn_normal_monsters
->   if pc == Down then pause else return ()
 
-> go_in_direction :: Dir -> GS ()
+> go_in_direction :: Dir -> U ()
 > go_in_direction dir =
 >   if dir == (0, 0) then pick_up_objects else do
 >   loc <- get_player_location
@@ -71,14 +64,14 @@
 >       Just cid -> player_attack cid
 >       Nothing -> move dir
 
-> move :: Dir -> GS ()
+> move :: Dir -> U ()
 > move dir = do
 >   loc <- get_player_location
 >   move_player_to (loc `add_dir` dir)
 >   update_arrays
 >   pick_up_objects
 
-> pick_up_objects :: GS ()
+> pick_up_objects :: U ()
 > pick_up_objects = do
 >   objects <- get_objects
 >   loc <- get_player_location
@@ -89,7 +82,11 @@
 >       modify_player (flip pick_up_objs remove)
 >       set_objects $ objects IA.// [(loc, stay)]
 
-> age_normal_monsters :: GS ()
-> age_normal_monsters = do
+
+> player_tick :: U ()
+> player_tick = move_normal_monsters >> maybe_spawn_normal_monsters
+
+> move_normal_monsters :: U ()
+> move_normal_monsters = do
 >   cids <- get_cids_by_movement WithHuman
->   mapM_ perform_monster_action cids
+>   mapM_ perform_monster_action_if_alive cids

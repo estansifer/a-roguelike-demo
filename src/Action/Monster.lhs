@@ -1,8 +1,9 @@
 
 > module Action.Monster (
->       perform_monster_action
+>       perform_monster_action_if_alive
 >   ) where
 
+> import Control.Monad (unless, when)
 > import qualified Data.Array.IArray as IA
 > import qualified Data.IntMap as IM
 
@@ -11,7 +12,6 @@
 > import Constants
 > import State.Creature
 > import State.State
-> import State.MState
 > import Action.Creatures
 > import Action.Attack
 
@@ -29,24 +29,25 @@ perform_monster_action must check that the monster is still in the cid_map
 and is still alive, as this code can be reached after the monster has been
 killed.
 
-> perform_monster_action :: CID -> GS ()
-> perform_monster_action cid = do
+> perform_monster_action_if_alive :: CID -> U ()
+> perform_monster_action_if_alive cid = do
 >   creatures <- get_creatures
 >   case IM.lookup cid (cid_map creatures) of
 >       Nothing -> return ()
->       Just creature -> do
+>       Just creature -> unless (killed creature) $ do
 >           let pos = location creature
->           pos <- fmap location $ get_creature cid
 >           p_pos <- get_player_location
 >           let dir_to_player = p_pos `sub_pos` pos
+>
 >           valid_dirs <- get_valid_dirs
 >           let can_attack = dir_to_player `elem` (valid_dirs IA.! pos)
 >
->           if can_attack then monster_attack cid else do
->               if norm dir_to_player <= smelling_range_squared
->                   then move_towards_player cid pos
->                   else return ()
+>           if can_attack
+>               then monster_attack cid
+>               else when
+>                       (norm dir_to_player <= smelling_range_squared)
+>                       (move_towards_player cid pos)
 >           age_creature cid
 
-> move_towards_player :: CID -> Pos -> GS ()
-> move_towards_player cid pos = choose_path cid >>= update_creature_location cid . (add_dir pos)
+> move_towards_player :: CID -> Pos -> U ()
+> move_towards_player cid pos = choose_path cid >>= move_creature cid . (add_dir pos)

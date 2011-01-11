@@ -3,8 +3,9 @@
 >       CID,
 >       Creature(..),
 >       Creatures(..),
->       full_health,
->       register_kill_listener
+>       register_kill_listener,
+>       new_creature,
+>       new_player_creature
 >   ) where
 >
 > import Data.IntMap (IntMap)
@@ -31,7 +32,8 @@
 >
 > data Creatures = Creatures {
 >       cid_map :: IntMap Creature,
->       loc_map :: Grid (MVar CID),
+>       loc_map :: IOGrid (Maybe CID),
+>       player_cid :: CID,
 >       next_cid :: CID
 >   }
 >
@@ -53,3 +55,15 @@
 >
 > register_kill_listener :: IO () -> Creature -> Creature
 > register_kill_listener listener c = c{kill_listeners = listener:(kill_listeners c)}
+>
+> new_creature :: Species -> Pos -> Creature
+> new_creature s l = Creature {
+>       species = s,
+>       health = full_health s,
+>       location = l,
+>       killed = False,
+>       kill_listeners = []
+>   }
+>
+> new_player_creature :: Creature
+> new_player_creature = new_creature human undefined

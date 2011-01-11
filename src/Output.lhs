@@ -18,7 +18,6 @@
 > import Defs
 > import State.Species
 > import State.State
-> import State.MState
 > import State.Creature
 > import Action.Creatures
 > import Action.Player
@@ -35,42 +34,44 @@
 >       then _paint canvas pos c
 >       else return ()
 
-> repaint :: GS ()
+> repaint :: U ()
 > repaint = do
->   prev <- get_last_repaint
+>   prev <- get_last_repaint_time
 >   now <- liftIO getCPUTime
 >   if now - prev > repaint_interval then repaint_force else return ()
 
-> repaint_force :: GS ()
+> repaint_force :: U ()
 > repaint_force = do
 >   paint_level
 >   paint_status
 >   liftIO $ refresh
->   set_last_repaint
+>   now <- liftIO getCPUTime
+>   set_last_repaint_time now
 
-> hard_refresh :: GS ()
+> hard_refresh :: U ()
 > hard_refresh = do
 >   liftIO $ blank_screen '_'
 >   liftIO $ refresh
 >   repaint_force
 
-> paint_level :: GS ()
+TODO only paint monsters we can see
+
+> paint_level :: U ()
 > paint_level = do
->   bounds <- get_bounds
->   terrain <- get_terrain
->   poss <- get_all_positions
->   objects <- get_objects
->   los <- get_line_of_sight
->   creatures <- get_living_creatures
->   kaart <- get_kaart
->   loc <- get_player_location
->   is_alive <- alive
+>   bounds      <- asks (bounds . constants)
+>   terrain     <- get_terrain
+>   poss        <- asks (all_positions . constants)
+>   objects     <- get_objects
+>   los         <- get_line_of_sight
+>   creatures   <- get_living_creatures
+>   kaart       <- get_kaart
+>   loc         <- get_player_location
+>   is_alive    <- alive
 >
 >   liftIO $ print_array_corner $ SA.runSTArray $ do
 >       canvas <- MA.newArray bounds unseen_character
 >       paint_terrain canvas terrain poss
 >       paint_objects canvas objects poss
->       paint_vis_monsters canvas los
 >       mapM_ (paint_creature canvas) creatures
 >       if not is_alive
 >           then paint_dead_character canvas loc
@@ -89,9 +90,6 @@
 >       let os = objects IA.! pos in
 >       if null os then return () else
 >       _paint canvas pos (objects_character os)
-
-> paint_vis_monsters :: Canvas s -> LOS -> S s
-> paint_vis_monsters canvas los = return ()
 
 Unused.  The player is a particular species now.
 
@@ -115,7 +113,7 @@ Unused.  The player is a particular species now.
 
 Paint the status line at bottom.
 
-> paint_status :: GS ()
+> paint_status :: U ()
 > paint_status = do
 >   (_, y) <- liftIO $ get_screen_size
 >   line <- status_line

@@ -14,16 +14,14 @@
 > import State.Inventory
 
 > data Player = Player {
->   player_cid :: CID,
 >   inventory :: Inventory,
 >   xp :: Integer,
 >   xp_level :: Integer,
 >   hunger :: Integer
 > }
 
-> new_player :: CID -> Player
-> new_player cid = Player {
->       player_cid = cid,
+> new_player :: Player
+> new_player = Player {
 >       inventory = empty_inventory,
 >       xp = starting_xp,
 >       xp_level = starting_xp_level,

@@ -49,7 +49,7 @@ the starting point or it is not accessible to the starting point.
 > compute_shortest_paths dirs pos = runSTArray $ do
 >       let bounds = IA.bounds dirs
 >       paths <- MA.newArray bounds (0, (0, 0))
->       visited <- (MA.newArray bounds False :: ST s (MGrid s Bool))
+>       visited <- (MA.newArray bounds False :: ST s (STGrid s Bool))
 >
 >       q_var <- empty_st_queue
 >       st_enqueue q_var (pos, (0, (0, 0)))
