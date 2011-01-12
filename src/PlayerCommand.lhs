@@ -14,6 +14,7 @@
 >   Read |
 >   Down |
 >   RefreshScreen |
+>   TypeMessage |
 >   Quit
 >       deriving (Eq, Show)
 
@@ -34,6 +35,7 @@
 >   '>' -> Just Down
 >
 >   'R' -> Just RefreshScreen
+>   '/' -> Just TypeMessage
 >
 >   'Q' -> Just Quit
 >

@@ -12,7 +12,7 @@
 > starting_xp_level :: Int
 > starting_xp_level = 1
 
-> food_nourishment = 250
+> food_nourishment = 200
 > potion_nourishment = 100
 
 > max_regen_time = 18

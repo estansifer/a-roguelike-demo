@@ -57,30 +57,37 @@ Switch
 
 > data Switch = Switch {
 >       on_flag :: MVar (),
->       off_flag :: MVar ()
+>       off_flag :: MVar (),
+>       is_on :: MVar Bool
 >   }
 
 > new_switch_off :: IO Switch
 > new_switch_off = do
 >   on <- newEmptyMVar
 >   off <- newMVar ()
->   return $ Switch {on_flag = on, off_flag = off}
+>   io <- newMVar False
+>   return $ Switch {on_flag = on, off_flag = off, is_on = io}
 
 > new_switch_on :: IO Switch
 > new_switch_on = do
 >   on <- newMVar ()
 >   off <- newEmptyMVar
->   return $ Switch {on_flag = on, off_flag = off}
+>   io <- newMVar True
+>   return $ Switch {on_flag = on, off_flag = off, is_on = io}
 
 > turn_on :: Switch -> IO ()
 > turn_on switch = do
+>   False <- takeMVar (is_on switch)
 >   takeMVar (off_flag switch)
 >   putMVar (on_flag switch) ()
+>   putMVar (is_on switch) True
 
 > turn_off :: Switch -> IO ()
 > turn_off switch = do
+>   True <- takeMVar (is_on switch)
 >   takeMVar (on_flag switch)
 >   putMVar (off_flag switch) ()
+>   putMVar (is_on switch) False
 
 > block_until_on :: Switch -> IO ()
 > block_until_on switch = readMVar (on_flag switch)
@@ -89,18 +96,10 @@ Switch
 > block_until_off switch = readMVar (off_flag switch)
 
 > is_switch_on :: Switch -> IO Bool
-> is_switch_on switch = do
->   m_on <- tryTakeMVar (on_flag switch)
->   case m_on of
->       Just _ -> putMVar (on_flag switch) () >> return True
->       Nothing -> return False
+> is_switch_on switch = readMVar (is_on switch)
 
 > is_switch_off :: Switch -> IO Bool
-> is_switch_off switch = do
->   m_off <- tryTakeMVar (off_flag switch)
->   case m_off of
->       Just _ -> putMVar (off_flag switch) () >> return True
->       Nothing -> return False
+> is_switch_off switch = fmap not $ readMVar (is_on switch)
 
 
 

@@ -54,7 +54,7 @@
 >       Move dir -> go_in_direction dir
 >       Drink -> drink
 >       Read -> scroll >> update_arrays >> pick_up_objects
->       Down -> pause
+>       Down -> end_level
 >   age_player
 
 > go_in_direction :: Dir -> U ()

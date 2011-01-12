@@ -20,6 +20,7 @@
 > import Action.PerformCommand
 > import Action.SpawnMonster
 > import Action.Creatures
+> import Action.Message
 > import Output
 > import PlayerCommand
 
@@ -44,7 +45,8 @@ after the game has been paused
 >   start_repainter
 >   process_player_commands input_stream
 >   lock repaint
->   lock unpause
+>   lock begin_level
+>   block_while_active
 >   block_until_paused
 
 Block until all threads are done.
@@ -63,12 +65,12 @@ Block until all threads are done.
 > start_clock :: L ()
 > start_clock = fork_thread $ do
 >   clock_speed <- asks (clock_speed . constants)
->   repeat_until_paused $ do
+>   repeat_while_level_active $ do
 >       liftIO $ threadDelay clock_speed
 >       unless_paused clock_tick
 
 > start_repainter :: L ()
-> start_repainter = fork_thread $ repeat_until_paused $ do
+> start_repainter = fork_thread $ repeat_while_level_active $ do
 >   liftIO $ threadDelay repaint_delay
 >   unless_paused repaint
 
@@ -76,7 +78,7 @@ Block until all threads are done.
 > process_player_commands :: Stream Char -> L ()
 > process_player_commands input_stream = fork_thread $ do
 >   liftIO $ drop_pending_values input_stream
->   repeat_until_paused $ do
+>   repeat_while_level_active $ do
 >       liftIO $ block_until_ready input_stream
 >       unless_paused $ process_command input_stream
 
@@ -84,7 +86,8 @@ Block until all threads are done.
 > process_command input_stream = do
 >   command <- liftIO $ next_command input_stream
 >   case command of
->       Quit -> (asks (quit_game . switching) >>= liftIO . raise_flag) >> pause
+>       Quit -> (asks (quit_game . switching) >>= liftIO . raise_flag) >> end_level
 >       RefreshScreen -> hard_refresh
+>       TypeMessage -> pause >> liftIO (type_message input_stream) >> unpause
 >       _ -> perform_command command
 >   repaint_force

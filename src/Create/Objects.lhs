@@ -16,8 +16,8 @@
 > all_objects = [Food, Scroll, Potion, Sword, Stairs]
 > density :: Object -> Double
 > density Food      = 0.0015
-> density Scroll    = 0.0010
-> density Potion    = 0.0005
+> density Scroll    = 0.0005  -- 0.0010
+> density Potion    = 0.0004
 > density Sword     = 0
 > density Stairs    = 0.0003
 

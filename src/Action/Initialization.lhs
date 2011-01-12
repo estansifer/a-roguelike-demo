@@ -37,6 +37,7 @@ none are placed in line-of-sight of the player.
 >   populate_monsters
 >   update_arrays
 >   new_paused_switch
+>   new_active_switch
 >   set_active_threads []
 >   hard_refresh        -- sets last repaint time
 

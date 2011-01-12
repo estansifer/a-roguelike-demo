@@ -30,6 +30,7 @@
 >       get_shortest_paths,
 >       get_last_repaint_time,
 >       get_paused_switch,
+>       get_level_active,
 >       get_active_threads,
 >
 >       set_depth,
@@ -43,6 +44,7 @@
 >       set_shortest_paths,
 >       set_last_repaint_time,
 >       set_paused_switch,
+>       set_level_active,
 >       set_active_threads,
 >
 >       modify_creatures,
@@ -116,6 +118,7 @@
 >
 >       last_repaint_time_  :: Integer,
 >       paused_switch_      :: Switch,
+>       level_active_       :: Switch,
 >       active_threads_     :: [Flag]
 >   }
 
@@ -133,6 +136,7 @@
 >
 >       last_repaint_time_  = undefined,
 >       paused_switch_      = undefined,
+>       level_active_       = undefined,
 >       active_threads_     = undefined
 >   }
 
@@ -197,6 +201,9 @@
 > get_paused_switch         :: U Switch
 > get_paused_switch         = gets paused_switch_
 >
+> get_level_active          :: U Switch
+> get_level_active          = gets level_active_
+>
 > get_active_threads        :: U [Flag]
 > get_active_threads        = gets active_threads_
 
@@ -232,6 +239,9 @@
 >
 > set_paused_switch :: Switch -> U ()
 > set_paused_switch p = modify $ \l -> l {paused_switch_ = p}
+>
+> set_level_active :: Switch -> U ()
+> set_level_active p = modify $ \l -> l {level_active_ = p}
 >
 > set_active_threads :: [Flag] -> U ()
 > set_active_threads a = modify $ \l -> l {active_threads_ = a}
