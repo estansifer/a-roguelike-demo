@@ -34,8 +34,8 @@ none are placed in line-of-sight of the player.
 >   make_new_terrain
 >   populate_objects
 >   create_creatures c
->   populate_monsters
 >   update_arrays
+>   populate_monsters
 >   new_paused_switch
 >   new_active_switch
 >   set_active_threads []
