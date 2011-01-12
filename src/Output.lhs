@@ -118,7 +118,7 @@ Paint the status line at bottom.
 > paint_status = do
 >   (_, y) <- liftIO $ get_screen_size
 >   line <- status_line
->   liftIO $ print_string 0 (y - 1) (line ++ "      ")
+>   liftIO $ print_string 0 (y - 1) (line ++ replicate 200 ' ')
 
 
 

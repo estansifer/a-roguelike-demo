@@ -3,15 +3,17 @@
 >       perform_command
 >   ) where
 
-> import Control.Monad (when)
+> import Control.Monad (when, forM_)
 > import qualified Data.Array.IArray as IA
 
 > import Util.Util (db)
+> import Util.RandomM
 > import Defs
 > import Output
 > import TerrainComputation
 > import PlayerCommand
 > import State.Species
+> import State.Creature
 > import State.Player
 > import State.State
 > import Action.Creatures
@@ -51,7 +53,7 @@
 >   case pc of
 >       Move dir -> go_in_direction dir
 >       Drink -> drink
->       Read -> scroll
+>       Read -> scroll >> update_arrays >> pick_up_objects
 >       Down -> pause
 >   age_player
 
@@ -82,11 +84,15 @@
 >       modify_player (flip pick_up_objs remove)
 >       set_objects $ objects IA.// [(loc, stay)]
 
-
 > player_tick :: U ()
 > player_tick = move_normal_monsters >> maybe_spawn_normal_monsters
 
 > move_normal_monsters :: U ()
 > move_normal_monsters = do
->   cids <- get_cids_by_movement WithHuman
->   mapM_ perform_monster_action_if_alive cids
+>   creatures <- get_living_creatures
+>   forM_ creatures $ \creature -> do
+>       cid <- get_cid creature
+>       forM_ (movement_type $ species creature) $ \mt -> case mt of
+>           WithHuman -> perform_monster_action_if_alive cid
+>           WithHumanSlow p -> wbranch p (perform_monster_action_if_alive cid) (return ())
+>           _ -> return ()

@@ -30,6 +30,9 @@
 >       kill_listeners :: [IO ()]
 >   }
 >
+> instance Show Creature where
+>   show c = "$" ++ [species_texture (species c)] ++ (show $ location c) ++ (show $ killed c) ++ "%"
+>
 > data Creatures = Creatures {
 >       cid_map :: IntMap Creature,
 >       loc_map :: IOGrid (Maybe CID),

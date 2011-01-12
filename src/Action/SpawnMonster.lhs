@@ -34,7 +34,7 @@
 >   cur_depth <- get_depth
 >   forM_ all_species $ \species ->
 >       when (cur_depth > min_depth species) $ sequence_ $ replicate
->           (fromIntegral ((area * scarcity species) `div` scarcity_per))
+>           (fromIntegral ((area * scarcity cur_depth species) `div` scarcity_per))
 >           (spawn_monster species)
 
 > spawn_monster :: Species -> U ()
@@ -87,4 +87,4 @@ Called once per human action tick
 >   forM_ ss $ \species ->
 >       when (cur_depth >= min_depth species) $ do
 >           r <- randomR (0, scarcity_per * scarcity_regen_time)
->           when (r < area * scarcity species) (spawn_monster species)
+>           when (r < area * scarcity cur_depth species) (spawn_monster species)

@@ -1,0 +1,24 @@
+
+texture         @   K   H   ,   O   E   Q   B   S   J
+damage          6   2   3
+health          18  6   7
+depth           -   0   
+reward          -   2
+base scarcity   -   100
+plus scarcity   -   0
+
+tile    depth   dam     hp      reward  bfreq   +freq   movement
+@       -       6       18      -       -       -       H
+K       0       2       6       2       100     0       WH
+H       1       3       7       3       70      15      WH
+,       2       5       8       2       90      0       -
+O       3       8       20      8       40      5       WHS 0.6
+E       4       8       5       4       60      10      T 400
+Q       5       5       9       5       40      5       5 x WHS 0.25
+B       5       2       2       1       120     10      T 230
+@       6       6       18      9       20      0       WH
+@       6       6       18      6       20      0       T 300
+S       7       3       8       4       30      20      TW 110 1600 0.7
+Z       8       10      15      6       40      5       WHS 0.3
+F       9       2       1       1       30      0       T 70
+J       10      5       27      11      10      5       WH + T 320

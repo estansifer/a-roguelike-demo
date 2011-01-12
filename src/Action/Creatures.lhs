@@ -7,6 +7,7 @@
 >       get_player_location,
 >       modify_player_creature,
 >
+>       get_cid,
 >       get_creature,
 >       get_cid_at,
 >       get_creatures_list,
@@ -69,6 +70,13 @@
 >   }
 
 
+> get_cid :: Creature -> U CID
+> get_cid creature = do
+>   creatures <- get_creatures
+>   mcid <- liftIO $ readArray (loc_map creatures) (location creature)
+>   case mcid of
+>       Just cid -> return cid
+>       Nothing -> db (show creature) >> error "what"
 
 > get_creature :: CID -> U Creature
 > get_creature cid = do
@@ -135,7 +143,9 @@
 >   pos <- fmap location $ get_creature cid
 >   let dir0 = snd $ pathing IA.! pos
 >   let closest = compare `on` (fst . (pathing IA.!) . add_dir pos)
->   let dirs = dir0 : sortBy closest (valid_dirs IA.! pos)
+>   let dirs = [dir0] ++
+>           (sortBy closest (filter (/= (0, 0)) (valid_dirs IA.! pos))) ++
+>           [(0, 0)]
 >   emptys <- forM dirs $ \dir ->
 >       fmap (|| (dir == (0, 0))) (is_empty_pos (pos `add_dir` dir))
 >   let dirs' = map fst $ filter snd $ zip dirs emptys

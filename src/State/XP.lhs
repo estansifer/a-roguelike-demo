@@ -31,4 +31,4 @@ Returns what level corresponds to the number of experience points
 > what_level :: Int -> Int
 > what_level = logb where
 >   logb :: Int -> Int
->   logb k = if k < 6 then 0 else 1 + (logb ((k * 6) `div` 7))
+>   logb k = if k < 6 then 0 else 1 + (logb ((k * 3) `div` 4))
