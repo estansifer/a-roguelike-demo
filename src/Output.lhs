@@ -144,6 +144,7 @@ their Species record, which are defined in various files.)
 > object_character Food = ';'
 > object_character Scroll = '?'
 > object_character Potion = '!'
+> object_character Sword = '/'
 > object_character Stairs = '>'
 
 Stairs > Potion > Scroll > Food

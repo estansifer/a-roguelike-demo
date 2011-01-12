@@ -2,7 +2,6 @@
 > module State.Player (
 >       Player(..),
 >       new_player,
->       pick_up_obj, pick_up_objs,
 >       eat,
 >       has_scroll, has_potion
 >   ) where
@@ -46,14 +45,3 @@
 >   read_scroll p = p {
 >           inventory = read_scroll (inventory p)
 >       }
-
-> pick_up_obj :: Player -> Object -> Player
-> pick_up_obj p obj = case obj of
->   Food -> eat p
->   Scroll -> p {inventory = add_scrolls (inventory p) 1}
->   Potion -> p {inventory = add_potions (inventory p) 1}
->   Stairs -> p
-
-> pick_up_objs :: Player -> [Object] -> Player
-> pick_up_objs p [] = p
-> pick_up_objs p (o:os) = pick_up_objs (pick_up_obj p o) os

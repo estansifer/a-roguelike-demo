@@ -6,16 +6,20 @@
 
 > import Control.Monad.ST (runST)
 > import qualified Data.Array.IArray as IA
+> import Control.Monad (forM)
 
 > import Defs
 > import Util.Util (arrayizeM)
 > import Util.RandomM
 > import TerrainComputation (random_open_location_m)
 
-> food_density      = 0.0015
-> scroll_density    = 0.001
-> potion_density    = 0.0005
-> stairs_density    = 0.0003
+> all_objects = [Food, Scroll, Potion, Sword, Stairs]
+> density :: Object -> Double
+> density Food      = 0.0015
+> density Scroll    = 0.0010
+> density Potion    = 0.0005
+> density Sword     = 0
+> density Stairs    = 0.0003
 
 > next_p :: Double -> Double
 > next_p p = if p > 0.8 then p else sqrt p
@@ -26,17 +30,16 @@
 
 > create_object_stack :: STR s [Object]
 > create_object_stack = do
->   num_food <- num food_density
->   num_scroll <- num scroll_density
->   num_potion <- num potion_density
->   num_stairs <- num stairs_density
->   return $ replicate num_food Food ++ replicate num_scroll Scroll ++ replicate num_potion Potion ++ replicate num_stairs Stairs
+>   objs <- forM all_objects $ \obj -> do
+>       n <- num (density obj)
+>       return $ replicate n obj
+>   return $ concat objs
 
-> create_stairs :: Terrain -> Objects -> STR s Objects
-> create_stairs terrain objects = do
+> create_one :: Object -> Terrain -> Objects -> STR s Objects
+> create_one obj terrain objects = do
 >   pos <- random_open_location_m terrain
 >   let o = objects IA.! pos
->   return $ objects IA.// [(pos, o ++ [Stairs])]
+>   return $ objects IA.// [(pos, o ++ [obj])]
 
 Given the existing terrain and a random seed, produce an array
 of objects.  Objects will only appear in empty locations, and
@@ -53,5 +56,6 @@ tend towards being stacked.  Exactly one location will have stairs.
 >           Wall -> return []
 >
 >   objs1 <- arrayizeM create_objects_at (IA.bounds terrain)
->   objs2 <- create_stairs terrain objs1
->   create_stairs terrain objs2
+>   objs2 <- create_one Stairs terrain objs1
+>   objs3 <- create_one Stairs terrain objs2
+>   create_one Sword terrain objs3

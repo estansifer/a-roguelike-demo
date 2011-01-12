@@ -3,7 +3,7 @@
 >       perform_command
 >   ) where
 
-> import Control.Monad (when, forM_)
+> import Control.Monad (when, forM_, unless)
 > import qualified Data.Array.IArray as IA
 
 > import Util.Util (db)
@@ -80,8 +80,8 @@
 >
 >   let remove = filter (Stairs /=) (objects IA.! loc)
 >   let stay   = filter (Stairs ==) (objects IA.! loc)
->   if null remove then return () else do
->       modify_player (flip pick_up_objs remove)
+>   unless (null remove) $ do
+>       mapM_ pick_up_object remove
 >       set_objects $ objects IA.// [(loc, stay)]
 
 > player_tick :: U ()

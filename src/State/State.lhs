@@ -68,6 +68,7 @@
 > import Util.Lock
 > import Util.Flag
 > import State.XP
+> import State.Species
 > import State.Player
 > import State.Creature
 > import State.Health
@@ -324,12 +325,14 @@
 > status_line_pure l =
 >       let p = player_ l
 >           c = creatures_ l
->           h = health (cid_map c IM.! player_cid c)
+>           pc = cid_map c IM.! player_cid c
+>           h = health pc
 >           x = xp p
 >       in
 >       "    > " ++ show (depth_ l) ++
 >       "    @ " ++ show (hp h) ++ "/" ++ show (max_hp h) ++
->       "    | " ++ show (xp_points x) ++ ":" ++ show (xp_level x) ++
+>       "    / " ++ show (max_damage (species pc)) ++
+>       "    * " ++ show (xp_points x) ++ ":" ++ show (xp_level x) ++
 >       "    ! " ++ show (num_potions (inventory p)) ++
 >       "    ? " ++ show (num_scrolls (inventory p)) ++
 >       "    ; " ++ show (hunger p)

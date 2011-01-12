@@ -37,7 +37,7 @@
 
 > data T = Floor | Wall deriving Eq
 
-> data Object = Food | Scroll | Potion | Stairs deriving (Eq, Ord)
+> data Object = Food | Scroll | Potion | Sword | Stairs deriving (Eq, Ord)
 
 > type Terrain = Grid T
 > type Pathing = Grid (Int, Dir)

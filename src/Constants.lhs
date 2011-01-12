@@ -15,8 +15,8 @@
 > food_nourishment = 250
 > potion_nourishment = 100
 
-> max_regen_time = 20
-> time_to_full_health = 450
+> max_regen_time = 18
+> time_to_full_health = 350
 
 > min_potion_heal = 15
 > potion_heal_percent = 30
@@ -31,6 +31,11 @@
 The minimum length of time between repaints of the screen, in microseconds.
 
 > repaint_interval = 10 * 1000
+
+The maximum (roughly) length of time between repaints of the scren, in microseconds.
+
+> repaint_delay :: Int
+> repaint_delay = 30 * 1000
 
 The kobold is the most common creature, with scarcity 100.
 One kobold should appear at the beginning of a level per 800 squares of level.

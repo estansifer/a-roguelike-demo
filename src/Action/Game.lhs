@@ -41,6 +41,7 @@ after the game has been paused
 > continue_level :: Stream Char -> L ()
 > continue_level input_stream = do
 >   start_clock
+>   start_repainter
 >   process_player_commands input_stream
 >   lock repaint
 >   lock unpause
@@ -63,9 +64,13 @@ Block until all threads are done.
 > start_clock = fork_thread $ do
 >   clock_speed <- asks (clock_speed . constants)
 >   repeat_until_paused $ do
->       lock repaint
 >       liftIO $ threadDelay clock_speed
 >       unless_paused clock_tick
+
+> start_repainter :: L ()
+> start_repainter = fork_thread $ repeat_until_paused $ do
+>   liftIO $ threadDelay repaint_delay
+>   unless_paused repaint
 
 
 > process_player_commands :: Stream Char -> L ()
