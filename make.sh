@@ -11,6 +11,9 @@
 auto_gen_main_name="AutoGenMain"
 src_dir="src"
 bin_dir="bin"
+main_name="Roguelike"
+
+mkdir $bin_dir
 
 # ghc --make -O2 *.lhs -threaded -prof -auto-all -i$src_dir
 cc="ghc"

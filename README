@@ -1,75 +1,41 @@
+Tested on GHC 6.12.3.
 
+Requires hscurses.  (Try "cabal install hscurses".)
 
-Modules
+Run "./make.sh Roguelike" to compile.
 
-    Defs
-    Demo2
-    Output
-    PlayerCommand
-    StupidClasses
-    TerrainComputation
+Run "./run.sh" to run.
 
-    Action/
-        MoveMonster
-        PerformCommand
-        SpawnMonster
+Don't read any of the source code or anything in the doc directory,
+or it'll give away important details.
 
-    Create/
-        Objects
-        Terrain
+The game is designed to be played by someone who has played
+a roguelike before.
 
-    State/
-        Creature
-        Health
-        Inventory
-        MState
-        Player
-        Species
-        State
-        XP
+The game doesn't have any particular end condition, but there is
+no new material after level 10 or so.
 
-    Util/
-        CursesWrapper
-        InputStream
-        Lock
-        Queue
-        RandomM
-        Signal
-        Util
+Here is the source code for processing input, it should give
+enough information to get started:
 
+char_to_command c = case c of
+   'h' -> Just $ Move (-1,  0)
+   'j' -> Just $ Move ( 0,  1)
+   'k' -> Just $ Move ( 0, -1)
+   'l' -> Just $ Move ( 1,  0)
+   'y' -> Just $ Move (-1, -1)
+   'u' -> Just $ Move ( 1, -1)
+   'b' -> Just $ Move (-1,  1)
+   'n' -> Just $ Move ( 1,  1)
+   '.' -> Just $ Move ( 0,  0)
 
-Terminology
+   'd' -> Just Drink
+   'r' -> Just Read
+   '>' -> Just Down
 
-    A 'creatures' is either the player or a monster.
+   'R' -> Just RefreshScreen
+   '/' -> Just TypeMessage
 
-    A location is 'open' if it has floor terrain.
-    A location is 'empty' if it has floor terrain and no creatures.
+   'Q' -> Just Quit
 
-
-Dependencies
-
-    Low-level:
-
-        Util.Util has no dependencies.
-        Util.* have no dependencies outside of Util.*.
-
-        Defs and StupidClasses have no dependencies.
-
-        PlayerCommand and TerrainComputation depend only on Defs and Util.*.
-
-    Static level (State.*):
-
-        Health -> ()
-        XP -> ()
-        Species -> ()
-        Creature -> Health, XP, Species
-
-        Inventory -> ()
-        Player -> Creature, Inventory
-
-        State -> Creature, Player
-        MState -> State
-
-    Dynamic level (Action.*, Create.*, Output)
-
-        blah blah
+   _ -> Nothing

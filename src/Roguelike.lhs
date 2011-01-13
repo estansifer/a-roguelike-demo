@@ -1,5 +1,5 @@
 
-> module Demo4 where
+> module Roguelike where
 
 > import Util.CursesWrapper
 > import State.State

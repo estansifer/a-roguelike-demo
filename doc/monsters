@@ -1,12 +1,4 @@
 
-texture         @   K   H   ,   O   E   Q   B   S   J
-damage          6   2   3
-health          18  6   7
-depth           -   0   
-reward          -   2
-base scarcity   -   100
-plus scarcity   -   0
-
 tile    depth   dam     hp      reward  bfreq   +freq   movement
 @       -       4       18      -       -       -       H
 K       0       2       6       2       100     -5      WH
