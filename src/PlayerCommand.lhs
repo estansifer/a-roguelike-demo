@@ -30,6 +30,16 @@
 >   'n' -> Just $ Move ( 1,  1)
 >   '.' -> Just $ Move ( 0,  0)
 >
+>   '4' -> Just $ Move (-1,  0)
+>   '2' -> Just $ Move ( 0,  1)
+>   '6' -> Just $ Move ( 0, -1)
+>   '8' -> Just $ Move ( 1,  0)
+>   '7' -> Just $ Move (-1, -1)
+>   '9' -> Just $ Move ( 1, -1)
+>   '1' -> Just $ Move (-1,  1)
+>   '3' -> Just $ Move ( 1,  1)
+>   '5' -> Just $ Move ( 0,  0)
+>
 >   'd' -> Just Drink
 >   'r' -> Just Read
 >   '>' -> Just Down
