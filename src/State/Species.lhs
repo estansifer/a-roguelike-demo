@@ -85,27 +85,13 @@ How many microseconds in a millisecond...
 >       base_scarcity = 70,
 >       scarcity_per_level = 5
 >   }
-
-> mushroom :: Species
-> mushroom = Species {
->       creature_type = Monster,
->       movement_type = [],
->       species_texture = ',',
->       min_depth = 2,
->       max_damage = 5,
->       max_health = 8,
->       xp_reward = 2,
->       base_scarcity = 90,
->       scarcity_per_level = -5
->   }
-
 > orc :: Species
 > orc = Species {
 >       creature_type = Monster,
 >       movement_type = [WithHumanSlow 0.6],
 >       species_texture = 'O',
->       min_depth = 3,
->       max_damage = 6,
+>       min_depth = 4,
+>       max_damage = 5,
 >       max_health = 18,
 >       xp_reward = 8,
 >       base_scarcity = 40,
@@ -117,8 +103,8 @@ How many microseconds in a millisecond...
 >       creature_type = Monster,
 >       movement_type = [Timed (400 * ms)],
 >       species_texture = 'E',
->       min_depth = 4,
->       max_damage = 8,
+>       min_depth = 2,
+>       max_damage = 5,
 >       max_health = 5,
 >       xp_reward = 4,
 >       base_scarcity = 60,
@@ -143,7 +129,7 @@ How many microseconds in a millisecond...
 >       creature_type = Monster,
 >       movement_type = [Timed (230 * ms)],
 >       species_texture = 'B',
->       min_depth = 5,
+>       min_depth = 3,
 >       max_damage = 2,
 >       max_health = 2,
 >       xp_reward = 1,
@@ -231,5 +217,5 @@ How many microseconds in a millisecond...
 
 > all_species :: [Species]
 > all_species =
->   [kobold, hobgoblin, mushroom, orc, emu, quagga,
+>   [kobold, hobgoblin, orc, emu, quagga,
 >   bat, doppleganger1, doppleganger2, snake, zombie, fly, jabberwocky]
