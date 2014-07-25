@@ -1,4 +1,5 @@
 
+> {-# LANGUAGE FlexibleInstances #-}
 > {-# LANGUAGE TypeSynonymInstances #-}
 > {-# LANGUAGE Rank2Types #-}
 >

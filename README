@@ -1,10 +1,20 @@
-Tested on GHC 6.12.3.
+# Roguelike Demo #
 
-Requires hscurses.  (Try "cabal install hscurses".)
+Created by Eric Stansifer and hosted at
+    https://github.com/estansifer/a-roguelike-demo/
 
-Run "./make.sh Roguelike" to compile.
+Tested on GHC 7.6.3, and requires hscurses. 
+To install, clone this git repository with
+    git clone git@github.com:estansifer/a-roguelike-demo.git
+install hscurses with
+    cabal install hscurses
+and compile with
+    ./make.sh Roguelike
 
-Run "./run.sh" to run.
+Run with
+    ./run.sh
+or
+    ./bin/Roguelike
 
 Don't read any of the source code or anything in the doc directory
 before playing the first time, or it'll give away important details.
@@ -49,3 +59,5 @@ char_to_command c = case c of
   'Q' -> Just Quit
 
   _ -> Nothing
+
+If you press / to type a message, press / again to resume.

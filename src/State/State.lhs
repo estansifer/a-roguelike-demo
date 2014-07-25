@@ -1,4 +1,5 @@
 
+> {-# LANGUAGE FlexibleInstances #-}
 > {-# LANGUAGE TypeSynonymInstances #-}
 > {-# LANGUAGE Rank2Types #-}
 >
@@ -274,7 +275,7 @@
 > run_game :: Parameters -> L a -> IO a
 > run_game params game = do
 >   l <- newIORef undefined_level
->   gl <- make_lock
+>   MkLock gl <- make_lock
 >   qg <- new_flag
 >   let s = Switching {
 >               global_lock = gl,

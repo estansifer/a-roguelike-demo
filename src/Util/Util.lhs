@@ -9,7 +9,7 @@
 
 > import Control.Monad.Trans
 
-> import Ix (Ix, range)
+> import Data.Ix (Ix, range)
 > import Data.Array (Array, array)
 
 Given a function and bounds on its input, make an array fom its values.

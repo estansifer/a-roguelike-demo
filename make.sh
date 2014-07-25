@@ -17,8 +17,8 @@ mkdir $bin_dir
 
 # ghc --make -O2 *.lhs -threaded -prof -auto-all -i$src_dir
 cc="ghc"
-#ccopts="--make -O2 -prof -auto-all -i$src_dir"
-ccopts="--make -O2 -threaded -i$src_dir"
+#ccopts="--make -O2 -prof -auto-all -i$src_dir -package hscurses"
+ccopts="--make -O2 -threaded -i$src_dir -package hscurses"
 
 $cc $ccopts $src_dir/*.lhs $src_dir/*/*.lhs
 
@@ -39,5 +39,9 @@ if [ -n "$2" ]
 then
     mv $bin_dir/$1 $bin_dir/$2
 fi
+
+else
+
+echo "No target specified, did you mean \"./make.sh Roguelike\"?"
 
 fi
