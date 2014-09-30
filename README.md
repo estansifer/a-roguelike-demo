@@ -38,8 +38,8 @@ Run the game with
 
     ./CursedThreads
 
-To move your character, use roguelike controls (hjklyubn) or
-numpad (12346789).
+To move your character, use roguelike controls (`hjklyubn`) or
+numpad (`12346789`).
 
 Additional controls are
  * `5` or `.` to wait in place
