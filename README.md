@@ -23,7 +23,8 @@ much damage you do.
 ## How to play the game
 
 To install this game you require GHC (Glasgow Haskell Compiler) and the
-hscurses library. The code was tested on GHC 7.6.3.
+hscurses library. The code was tested on GHC 7.6.3. If you do not have
+hscurses, you can use the command `cabal install hscurses` to install it.
 
 To install the game, clone this git repository with
 
@@ -38,7 +39,12 @@ Run the game with
     ./CursedThreads
 
 To move your character, use roguelike controls (hjklyubn) or
-numpad (12346789). "`.`" or `5` causes the player to wait in place.
+numpad (12346789).
 
-Additional controls are `d` to drink a potion, `r` to read a scroll,
-`>` to go down a level, `R` to refresh the screen, and `Q` to quit.
+Additional controls are
+ * `5` or `.` to wait in place
+ * `d` to drink a potion
+ * `r` to read a scroll
+ * `>` to go down a level
+ * `R` to refresh the screen
+ * `Q` to quit
