@@ -1,7 +1,10 @@
-# Roguelike Demo #
+Cursed Threads
+    a game by Eric Stansifer
 
-Created by Eric Stansifer and hosted at
+Hosted at
     https://github.com/estansifer/a-roguelike-demo/
+
+
 
 Tested on GHC 7.6.3, and requires hscurses. 
 To install, clone this git repository with

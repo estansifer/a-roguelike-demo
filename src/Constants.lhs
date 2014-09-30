@@ -19,10 +19,10 @@
 > time_to_full_health = 350
 
 > min_potion_heal = 15
-> potion_heal_percent = 30
+> potion_heal_percent = 100
 
 > phase_door_range :: Int
-> phase_door_range = 10
+> phase_door_range = 30
 
 
 > smelling_range_squared :: Int

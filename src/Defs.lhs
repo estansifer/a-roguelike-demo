@@ -90,7 +90,7 @@ Grid height and width.
 > norm (a, b) = a * a + b * b
 
 Given the terrain 't' and a position 'p', returns a list of all directions
-from to 'p', including the zero direction.  Assumes that if 'p' is on the
+from 'p', including the zero direction.  Assumes that if 'p' is on the
 boundary, then 'p' must be a wall.
 
 > compute_valid_dirs_at :: Terrain -> Pos -> [Dir]
