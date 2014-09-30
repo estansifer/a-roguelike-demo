@@ -1,8 +1,7 @@
-Cursed Threads
-    a game by Eric Stansifer
+# Cursed Threads
+a game by Eric Stansifer
 
-Hosted at
-    https://github.com/estansifer/a-roguelike-demo/
+Hosted at `https://github.com/estansifer/a-roguelike-demo/`
 
 
 
@@ -31,6 +30,7 @@ no new material after level 10 or so.
 Here is the source code for processing input, it should give
 enough information to get started:
 
+```haskell
 char_to_command c = case c of
   'h' -> Just $ Move (-1,  0)
   'j' -> Just $ Move ( 0,  1)
@@ -62,5 +62,6 @@ char_to_command c = case c of
   'Q' -> Just Quit
 
   _ -> Nothing
+```
 
 If you press / to type a message, press / again to resume.
