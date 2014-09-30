@@ -45,7 +45,7 @@
 >   '>' -> Just Down
 >
 >   'R' -> Just RefreshScreen
->   '/' -> Just TypeMessage
+>   -- '/' -> Just TypeMessage
 >
 >   'Q' -> Just Quit
 >

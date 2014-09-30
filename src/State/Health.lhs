@@ -28,7 +28,7 @@
 
 > heal_potion :: Health -> Health
 > heal_potion h = h {hp = min (max_hp h) hp'} where
->   hp' = hp h + min min_potion_heal ((max_hp h * potion_heal_percent) `div` 100)
+>   hp' = hp h + max min_potion_heal ((max_hp h * potion_heal_percent) `div` 100)
 
 > level_up_health :: Health -> Health
 > level_up_health h = h {max_hp = max_hp', hp = min max_hp' (hp h + 3)} where

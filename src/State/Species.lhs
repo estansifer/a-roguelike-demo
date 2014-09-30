@@ -202,8 +202,8 @@ How many microseconds in a millisecond...
 >       scarcity_per_level = 0
 >   }
 
-> jabberwocky :: Species
-> jabberwocky = Species {
+> jabberwock :: Species
+> jabberwock = Species {
 >       creature_type = Monster,
 >       movement_type = [WithHuman, Timed (320 * ms)],
 >       species_texture = 'J',
@@ -218,4 +218,4 @@ How many microseconds in a millisecond...
 > all_species :: [Species]
 > all_species =
 >   [kobold, hobgoblin, orc, emu, quagga,
->   bat, doppleganger1, doppleganger2, snake, zombie, fly, jabberwocky]
+>   bat, doppleganger1, doppleganger2, snake, zombie, fly, jabberwock]
