@@ -70,7 +70,7 @@ How many microseconds in a millisecond...
 >       max_health = 6,
 >       xp_reward = 2,
 >       base_scarcity = 100,
->       scarcity_per_level = -5
+>       scarcity_per_level = -10
 >   }
 
 > hobgoblin :: Species
@@ -83,7 +83,7 @@ How many microseconds in a millisecond...
 >       max_health = 7,
 >       xp_reward = 3,
 >       base_scarcity = 70,
->       scarcity_per_level = 5
+>       scarcity_per_level = -5
 >   }
 
 > orc :: Species
@@ -96,7 +96,7 @@ How many microseconds in a millisecond...
 >       max_health = 18,
 >       xp_reward = 8,
 >       base_scarcity = 40,
->       scarcity_per_level = 0
+>       scarcity_per_level = -5
 >   }
 
 > emu :: Species 
@@ -109,7 +109,7 @@ How many microseconds in a millisecond...
 >       max_health = 5,
 >       xp_reward = 4,
 >       base_scarcity = 60,
->       scarcity_per_level = 10
+>       scarcity_per_level = -5
 >   }
 
 > quagga :: Species
@@ -122,7 +122,7 @@ How many microseconds in a millisecond...
 >       max_health = 9,
 >       xp_reward = 5,
 >       base_scarcity = 40,
->       scarcity_per_level = 5
+>       scarcity_per_level = -5
 >   }
 
 > bat :: Species
@@ -135,7 +135,7 @@ How many microseconds in a millisecond...
 >       max_health = 2,
 >       xp_reward = 1,
 >       base_scarcity = 120,
->       scarcity_per_level = 10
+>       scarcity_per_level = -10
 >   }
 
 > doppleganger1 :: Species
@@ -147,7 +147,7 @@ How many microseconds in a millisecond...
 >       max_damage = 6,
 >       max_health = 18,
 >       xp_reward = 9,
->       base_scarcity = 20,
+>       base_scarcity = 40,
 >       scarcity_per_level = 0
 >   }
 
@@ -160,7 +160,7 @@ How many microseconds in a millisecond...
 >       max_damage = 6,
 >       max_health = 18,
 >       xp_reward = 6,
->       base_scarcity = 20,
+>       base_scarcity = 40,
 >       scarcity_per_level = 0
 >   }
 
@@ -174,7 +174,7 @@ How many microseconds in a millisecond...
 >       max_health = 8,
 >       xp_reward = 4,
 >       base_scarcity = 30,
->       scarcity_per_level = 0
+>       scarcity_per_level = 5
 >   }
 
 > zombie :: Species
@@ -187,7 +187,7 @@ How many microseconds in a millisecond...
 >       max_health = 45,
 >       xp_reward = 6,
 >       base_scarcity = 40,
->       scarcity_per_level = 5
+>       scarcity_per_level = -5
 >   }
 
 > fly :: Species
@@ -195,7 +195,7 @@ How many microseconds in a millisecond...
 >       creature_type = Monster,
 >       movement_type = [Timed (70 * ms)],
 >       species_texture = 'F',
->       min_depth = 7,
+>       min_depth = 9,
 >       max_damage = 1,
 >       max_health = 1,
 >       xp_reward = 1,
@@ -206,13 +206,13 @@ How many microseconds in a millisecond...
 > jabberwock :: Species
 > jabberwock = Species {
 >       creature_type = Monster,
->       movement_type = [WithHuman, Timed (320 * ms)],
+>       movement_type = [WithHuman, Timed (350 * ms)],
 >       species_texture = 'J',
 >       min_depth = 8,
 >       max_damage = 5,
 >       max_health = 27,
 >       xp_reward = 13,
->       base_scarcity = 10,
+>       base_scarcity = 20,
 >       scarcity_per_level = 5
 >   }
 
