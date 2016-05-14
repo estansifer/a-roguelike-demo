@@ -3,7 +3,7 @@
 >       arrayize, arrayizeM,
 >       while,
 >       loop,
->       repeat_until, repeat_while,
+>       repeat_until, repeat_until_max_tries, repeat_while,
 >       db
 >   ) where
 
@@ -44,6 +44,13 @@ Repeat the given action 'body' forever.
 >   a <- body
 >   b <- condition a
 >   if b then return a else repeat_until body condition
+
+> repeat_until_max_tries :: Monad m => Int -> m a -> (a -> m Bool) -> m (Maybe a)
+> repeat_until_max_tries 0 _ _ = return Nothing
+> repeat_until_max_tries k body condition = do
+>   a <- body
+>   b <- condition a
+>   if b then return (Just a) else repeat_until_max_tries (k - 1) body condition
 
 > repeat_while :: Monad m => m a -> (a -> m Bool) -> m a
 > repeat_while body condition = do

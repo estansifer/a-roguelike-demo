@@ -13,7 +13,7 @@
 > import Data.List (intersect)
 > import Control.Monad (forM_, when)
 >
-> import Util.Util (repeat_until, db)
+> import Util.Util (repeat_until_max_tries, db)
 > import Util.RandomM
 > import Util.Flag (regular_delay, make_sine_delay)
 > import TerrainComputation
@@ -41,14 +41,17 @@
 > spawn_monster species = do
 >   los <- get_line_of_sight
 >   terrain <- get_terrain
->   pos <- repeat_until
+>   m_pos <- repeat_until_max_tries 100
 >           (random_open_location_m terrain)
 >           (\p -> do
 >               e <- is_empty_pos p
 >               return (e && (not (los IA.! p))))
->   cid <- create_creature_at species pos
->   forM_ (movement_type species) $ \mt ->
->       when (timed mt) (fork_creature_movement mt cid)
+>   case m_pos of
+>       Nothing -> return ()
+>       Just pos -> do
+>           cid <- create_creature_at species pos
+>           forM_ (movement_type species) $ \mt ->
+>               when (timed mt) (fork_creature_movement mt cid)
 
 > fork_creature_movement :: MovementType -> CID -> U ()
 > fork_creature_movement mt cid = do

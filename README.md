@@ -10,12 +10,11 @@ In this game, you descend through a series of randomly generated dungeon levels
 filled with successively more dangerous monsters.
 
 This game was designed to demonstrate a particular idea I had, and was aimed at
-players already familiar with the roguelike genre. There is no particular way
-to win, and there are no new monsters after level 10 or so.
+players already familiar with the roguelike genre. There is no way to win, and
+there are no new monsters after level 10 or so.
 
 The size of the dungeon is based on the size of the terminal window it is
-played in, so use a smaller window if you want a quicker, harder game. (Too
-small and the game may lock up when you enter a new level.)
+played in, so use a smaller window if you want a quicker, harder game.
 
 The slash `/`, by the way, represents the strength of your weapon and so how
 much damage you do.
